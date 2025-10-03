@@ -32,6 +32,11 @@ class CalendarManager: ObservableObject {
         subscribeToCalendarChanges()
     }
     
+    func goToCurrentMonth(){
+        currentMonth = Date()
+        Task { await loadMonth(date: currentMonth) }
+    }
+    
     func goToNextMonth() {
         if let nextMonth = calendar.date(byAdding: .month, value: 1, to: currentMonth) {
             currentMonth = nextMonth
@@ -207,7 +212,9 @@ class CalendarManager: ObservableObject {
             let dayStart = calendar.startOfDay(for: day)
             let dayEvents = events[dayStart] ?? []
             
-            newDays.append(CalendarDay(date: day, lunar: lunarText, events: dayEvents))
+            let solar_term = SolarTermHelper.getSolarTerm(for: day)
+            
+            newDays.append(CalendarDay(date: day, lunar: lunarText,holiday: nil,solar_term: solar_term , events: dayEvents))
         }
 
         self.days = newDays

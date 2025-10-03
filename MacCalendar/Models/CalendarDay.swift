@@ -11,5 +11,7 @@ import SwiftUI
 struct CalendarDay:Hashable{
     let date:Date
     let lunar:String?
+    let holiday:String?
+    let solar_term:String?
     let events:[CalendarEvent]
 }

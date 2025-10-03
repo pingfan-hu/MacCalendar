@@ -25,6 +25,9 @@ struct CalendarView: View {
                     }
                 Spacer()
                 Text(ConvertTitle(date: calendarManager.currentMonth))
+                    .onTapGesture {
+                        calendarManager.goToCurrentMonth()
+                    }
                 Spacer()
                 Image(systemName: "chevron.compact.forward")
                     .frame(width:80,alignment: .trailing)
@@ -66,7 +69,7 @@ struct CalendarView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
                                 
-                                Text(day.lunar ?? "")
+                                Text(day.solar_term ?? day.lunar ?? "")
                                     .font(.system(size: 8))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
                             }
