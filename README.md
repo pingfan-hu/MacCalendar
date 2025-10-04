@@ -16,4 +16,4 @@ MacCalendar - 完全免费且开源的macOS小而美菜单栏日历
 
 - 放假调休显示
 
-![截屏](https://github.com/user-attachments/assets/af627d0b-df40-4b82-804b-f57828e6140c)
+![截屏](https://github.com/user-attachments/assets/5a2185bb-9881-401f-8c3d-63692e582ab1)
