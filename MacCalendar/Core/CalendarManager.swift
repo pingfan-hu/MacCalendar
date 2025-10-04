@@ -17,7 +17,7 @@ class CalendarManager: ObservableObject {
     @Published var selectedDayEvents: [CalendarEvent] = []
     @Published var authorizationStatus: EKAuthorizationStatus = .notDetermined
     
-    private let calendar = Calendar.current
+    private let calendar = Calendar.mondayBased
     private let eventStore = EKEventStore()
     private var cancellables = Set<AnyCancellable>()
 
@@ -53,7 +53,7 @@ class CalendarManager: ObservableObject {
     
     func getEvent(date: Date) {
         selectedDay = date
-        if let day = days.first(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
+        if let day = days.first(where: { Calendar.mondayBased.isDate($0.date, inSameDayAs: date) }) {
             selectedDayEvents = day.events
         } else {
             selectedDayEvents = []
@@ -207,14 +207,17 @@ class CalendarManager: ObservableObject {
         for day in gridDates {
             let lunarMonth = lunarCalendar.component(.month, from: day)
             let lunarDay = lunarCalendar.component(.day, from: day)
-            let lunarText = (lunarDay == 1) ? lunarMonthSymbols[lunarMonth - 1] : lunarDaySymbols[lunarDay - 1]
+            let lunar_short = (lunarDay == 1) ? lunarMonthSymbols[lunarMonth - 1] : lunarDaySymbols[lunarDay - 1]
+            let lunar_full = lunarMonthSymbols[lunarMonth - 1] + lunarDaySymbols[lunarDay - 1]
             
             let dayStart = calendar.startOfDay(for: day)
             let dayEvents = events[dayStart] ?? []
             
             let solar_term = SolarTermHelper.getSolarTerm(for: day)
             
-            newDays.append(CalendarDay(date: day, lunar: lunarText,holiday: nil,solar_term: solar_term , events: dayEvents))
+            let holidays = HolidayHelper.getHolidays(date: day, lunarMonth: lunarMonth, lunarDay: lunarDay)
+
+            newDays.append(CalendarDay(date: day, lunar_short: lunar_short,lunar_full: lunar_full,holidays: holidays,solar_term: solar_term , events: dayEvents))
         }
 
         self.days = newDays

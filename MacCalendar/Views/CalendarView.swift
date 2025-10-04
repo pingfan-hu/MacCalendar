@@ -12,7 +12,7 @@ struct CalendarView: View {
     
     let weekDays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
-    let calendar = Calendar.current
+    let calendar = Calendar.mondayBased
 
     var body: some View {
         VStack(spacing:0) {
@@ -69,7 +69,7 @@ struct CalendarView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
                                 
-                                Text(day.solar_term ?? day.lunar ?? "")
+                                Text(!day.holidays.isEmpty ? day.holidays[0] : day.solar_term ?? day.lunar_short ?? "")
                                     .font(.system(size: 8))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
                             }
