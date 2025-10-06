@@ -10,7 +10,7 @@ import SwiftUI
 struct SettingsAboutView: View {
     var body: some View {
         VStack(alignment:.center,spacing: 10){
-            Text("MacClaendar")
+            Text("MacCalendar")
                 .font(.title)
             Text("完全免费且开源的macOS小而美菜单栏日历")
                 .foregroundStyle(.secondary)

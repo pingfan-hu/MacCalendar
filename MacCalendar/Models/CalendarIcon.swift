@@ -26,8 +26,6 @@ class CalendarIcon: ObservableObject {
     private func updateDisplayOutput() {
         dateFormatter.locale = Locale.current
         
-        print(Locale.current.identifier)
-        
         switch SettingsManager.displayMode {
         case .icon:
             displayOutput = Self.iconModeIdentifier
