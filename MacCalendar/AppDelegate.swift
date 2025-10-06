@@ -7,19 +7,47 @@
 
 import SwiftUI
 import AppKit
+import Combine
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
     var statusItem: NSStatusItem!
     var popover: NSPopover!
+    var settingsWindow: NSWindow?
+    
+    private var calendarIcon = CalendarIcon()
+    private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "calendar", accessibilityDescription: "Calendar")
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
             button.action = #selector(statusItemClicked)
             button.target = self
         }
+        
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.modifierFlags.contains(.command) && event.characters == "," {
+                self?.showSettingsWindow()
+                return nil
+            }
+            return event
+        }
+        
+        calendarIcon.$displayOutput
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] output in
+                        guard let button = self?.statusItem.button else { return }
+                        
+                        if output == CalendarIcon.iconModeIdentifier {
+                            button.image = NSImage(systemSymbolName: "calendar", accessibilityDescription: "Calendar")
+                            button.title = ""
+                        } else {
+                            button.title = output
+                            button.image = nil
+                        }
+                    }
+                    .store(in: &cancellables)
 
         popover = NSPopover()
         popover.appearance = NSAppearance(named: .aqua)
@@ -33,7 +61,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if event.type == .rightMouseUp {
             let menu = NSMenu()
-            menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
+            menu.addItem(NSMenuItem(title: "设置", action: #selector(showSettingsWindow), keyEquivalent: ","))
+            menu.addItem(NSMenuItem.separator())
+            menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
             
             statusItem.menu = menu
             statusItem.button?.performClick(nil)
@@ -61,8 +91,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func closePopover() {
         popover.performClose(nil)
     }
-
-    @objc func quitApp() {
-        NSApp.terminate(nil)
+    
+    @objc func showSettingsWindow() {
+        if settingsWindow == nil {
+            let settingsView = SettingsView()
+            
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 420, height: 300),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            window.center()
+            window.isReleasedWhenClosed = false
+            window.contentView = NSHostingView(rootView: settingsView)
+            settingsWindow = window
+        }
+        
+        NSApp.activate(ignoringOtherApps: true)
+        settingsWindow?.makeKeyAndOrderFront(nil)
     }
 }
