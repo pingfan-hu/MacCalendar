@@ -60,7 +60,7 @@ class CalendarManager: ObservableObject {
         }
     }
     
-    // 重新加载数据的方法，例如在 App 从后台返回时调用
+    // 重新加载数据
     func refreshEvents() {
         Task {
             await loadMonth(date: currentMonth)
@@ -163,7 +163,6 @@ class CalendarManager: ObservableObject {
         
         // 上个月补齐
         let weekdayOfFirst = calendar.component(.weekday, from: firstDayOfMonth)
-        // 周日是1, 周一是2... 我们希望周一是0偏移
         let offsetToMonday = (weekdayOfFirst - calendar.firstWeekday + 7) % 7
         if offsetToMonday > 0 {
             for i in stride(from: offsetToMonday, to: 0, by: -1) {
@@ -179,7 +178,7 @@ class CalendarManager: ObservableObject {
             }
         }
         
-        // 下个月补齐 (确保总数是7的倍数)
+        // 下个月补齐
         let totalDays = gridDates.count
         let remaining = totalDays % 7
         if remaining > 0 {

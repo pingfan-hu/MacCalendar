@@ -24,11 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover = NSPopover()
         popover.appearance = NSAppearance(named: .aqua)
         popover.behavior = .transient
-        let hostingController = NSHostingController(rootView: ContentView())
-        hostingController.sizingOptions = .intrinsicContentSize
-        popover.contentViewController = hostingController
         
-        // 监听应用失去焦点的通知
         NotificationCenter.default.addObserver(self, selector: #selector(closePopover), name: NSApplication.didResignActiveNotification, object: nil)
     }
 
@@ -52,9 +48,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             if popover.isShown {
                 popover.performClose(nil)
             } else {
-                // 在显示 popover 前，激活我们的应用,当用户切换到其他App时，系统才会正确发送 didResignActiveNotification 通知。
-                NSApp.activate(ignoringOtherApps: true)
+                let hostingController = NSHostingController(rootView: ContentView())
+                hostingController.sizingOptions = .intrinsicContentSize
+                popover.contentViewController = hostingController
                 
+                NSApp.activate(ignoringOtherApps: true)
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             }
         }
