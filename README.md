@@ -1,6 +1,9 @@
-## MacCalendar - 完全免费且开源的macOS小而美菜单栏日历
+## MacCalendar - 完全免费且开源的 macOS 菜单栏日历
 
+![SwiftUI](https://img.shields.io/badge/SwiftUI-EC662F?style=flat&logo=swift&logoColor=white)
 [![macOS](https://img.shields.io/badge/macOS-14.0+-green.svg)](https://github.com/bylinxx/MacCalendar/releases/latest)
+![GitHub Release](https://img.shields.io/github/v/release/bylinxx/MacCalendar)
+
 
 ## 主要功能
 
