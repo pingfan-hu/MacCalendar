@@ -1,28 +1,35 @@
-## MacCalendar - 完全免费且开源的 macOS 菜单栏日历
+# MacCalendar (Enhanced Fork)
 
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-EC662F?style=flat&logo=swift&logoColor=white)
-[![macOS](https://img.shields.io/badge/macOS-14.0+-green.svg)](https://github.com/bylinxx/MacCalendar/releases/latest)
-![GitHub Release](https://img.shields.io/github/v/release/bylinxx/MacCalendar)
+[![macOS](https://img.shields.io/badge/macOS-14.0+-green.svg)](https://github.com/bylinxx/MacCalendar)
 
+> Forked from [bylinxx/MacCalendar](https://github.com/bylinxx/MacCalendar) with UI/UX improvements
 
-## 主要功能
+A free and open-source macOS menu bar calendar with Chinese lunar calendar support.
 
-- 运行后只会在菜单栏显示，不会有其他任何窗口
+## Features
 
-- 支持中国农历、24节气、大部分节日（公历或农历）
+- Menu bar-only app (no dock icon or main window)
+- Chinese lunar calendar, 24 solar terms, and holidays
+- System calendar integration (read-only)
+- Customizable menu bar display (icon/date/time/custom)
 
-- 读取系统日程数据（仅展示，目前没有增删改等）
+## Improvements in This Fork
 
-- 菜单栏可以自定义显示内容，图标/日期/时间/自定义
+- **Wider time column** - Fixed timestamp line breaks for Chinese AM/PM prefixes
+- **Left-aligned timestamps** - Better visual alignment for event times
+- **Larger menu bar icon** - More consistent with other macOS menu bar apps
+- **Auto-focus on open** - Popover is immediately interactive without extra click
+- **Hover effects** - Visual feedback when hovering over calendar dates
 
-## 未来功能
+## Build
 
-- 完整的日程增删改
+Open `MacCalendar.xcodeproj` in Xcode and build (Cmd+R), or:
 
-- 放假调休显示
+```bash
+xcodebuild -project MacCalendar.xcodeproj -scheme MacCalendar build
+```
 
-![截屏](https://github.com/user-attachments/assets/5a2185bb-9881-401f-8c3d-63692e582ab1)
+## Credits
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=bylinxx/MacCalendar&type=Timeline)](https://www.star-history.com/#bylinxx/MacCalendar&Timeline)
+Original project by [bylinxx](https://github.com/bylinxx/MacCalendar)

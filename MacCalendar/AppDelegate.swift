@@ -40,7 +40,8 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
                         guard let button = self?.statusItem.button else { return }
                         
                         if output == CalendarIcon.iconModeIdentifier {
-                            button.image = NSImage(systemSymbolName: "calendar", accessibilityDescription: "Calendar")
+                            let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .regular)
+                            button.image = NSImage(systemSymbolName: "calendar", accessibilityDescription: "Calendar")?.withSymbolConfiguration(config)
                             button.title = ""
                         } else {
                             button.title = output
@@ -81,9 +82,10 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
                 let hostingController = NSHostingController(rootView: ContentView())
                 hostingController.sizingOptions = .intrinsicContentSize
                 popover.contentViewController = hostingController
-                
+
                 NSApp.activate(ignoringOtherApps: true)
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+                popover.contentViewController?.view.window?.makeKey()
             }
         }
     }

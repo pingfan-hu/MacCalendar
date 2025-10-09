@@ -14,7 +14,7 @@ struct EventListItemView: View {
     
     var body: some View {
         HStack {
-            VStack(spacing:2){
+            VStack(alignment: .leading, spacing:2){
                 if event.isAllDay{
                     Text("全天")
                 }
@@ -26,7 +26,7 @@ struct EventListItemView: View {
                 }
             }
             .font(.system(size: 10))
-            .frame(width:30)
+            .frame(width:50, alignment: .leading)
             
             HStack(spacing:0){
                 Rectangle()

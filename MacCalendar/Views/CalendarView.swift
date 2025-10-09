@@ -9,10 +9,12 @@ import SwiftUI
 
 struct CalendarView: View {
     @ObservedObject var calendarManager:CalendarManager
-    
+
     let weekDays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     let calendar = Calendar.mondayBased
+
+    @State private var hoveredDate: Date?
 
     var body: some View {
         VStack(spacing:0) {
@@ -64,11 +66,16 @@ struct CalendarView: View {
                                 .fill(Color.red.opacity(0.3))
                                 .frame(width: 35, height: 35, alignment: .center)
                         }
+                        if let hovered = hoveredDate, calendar.isDate(day.date, equalTo: hovered, toGranularity: .day), !isToday {
+                            Circle()
+                                .fill(Color.gray.opacity(0.2))
+                                .frame(width: 35, height: 35, alignment: .center)
+                        }
                             VStack(spacing: -2) {
                                 Text("\(calendar.component(.day, from: day.date))")
                                     .font(.system(size: 12))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
-                                
+
                                 Text(!day.holidays.isEmpty ? day.holidays[0] : day.solar_term ?? day.lunar_short ?? "")
                                     .font(.system(size: 8))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
@@ -84,6 +91,9 @@ struct CalendarView: View {
                         }
                     }
                     .contentShape(Circle())
+                    .onHover { isHovering in
+                        hoveredDate = isHovering ? day.date : nil
+                    }
                     .onTapGesture {
                         calendarManager.getEvent(date: day.date)
                     }
