@@ -14,6 +14,9 @@ struct SettingsAboutView: View {
                 .font(.title)
             Text("完全免费且开源的macOS小而美菜单栏日历")
                 .foregroundStyle(.secondary)
+            Text("Original version from bylinxx, forked by Pingfan Hu")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             HStack{
                 Text("版本")
                 Text(Bundle.main.appVersion ?? "")
