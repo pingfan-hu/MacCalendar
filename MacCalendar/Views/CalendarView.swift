@@ -10,11 +10,19 @@ import SwiftUI
 struct CalendarView: View {
     @ObservedObject var calendarManager:CalendarManager
 
-    let weekDays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     let calendar = Calendar.mondayBased
 
     @State private var hoveredDate: Date?
+
+    var weekDays: [String] {
+        let calendar = Calendar.mondayBased
+        let symbols = calendar.veryShortWeekdaySymbols
+        let firstWeekday = calendar.firstWeekday
+        // Rotate array to match system's first weekday (1 = Sunday, 2 = Monday, etc.)
+        let rotated = Array(symbols.dropFirst(firstWeekday - 1)) + Array(symbols.prefix(firstWeekday - 1))
+        return rotated
+    }
 
     var body: some View {
         VStack(spacing:0) {

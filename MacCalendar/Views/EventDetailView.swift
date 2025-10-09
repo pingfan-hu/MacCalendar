@@ -20,7 +20,7 @@ struct EventDetailView: View {
                 Image(systemName: "clock")
                 Text(DateHelper.formatDate(date: event.startDate, format: "yyyy/MM/dd"))
                 if event.isAllDay {
-                    Text("全天")
+                    Text(LocalizationHelper.allDay)
                 }
                 else{
                     HStack(spacing:0){

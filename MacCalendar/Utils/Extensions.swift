@@ -9,9 +9,7 @@ import Foundation
 
 extension Calendar {
     static var mondayBased: Calendar {
-        var calendar = Calendar.current
-        calendar.firstWeekday = 2
-        return calendar
+        return Calendar.current
     }
 }
 

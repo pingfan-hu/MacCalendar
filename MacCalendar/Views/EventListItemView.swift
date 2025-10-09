@@ -16,7 +16,7 @@ struct EventListItemView: View {
         HStack {
             VStack(alignment: .leading, spacing:2){
                 if event.isAllDay{
-                    Text("全天")
+                    Text(LocalizationHelper.allDay)
                 }
                 else{
                     Text(event.startDate, style: .time)
