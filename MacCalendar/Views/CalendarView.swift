@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CalendarView: View {
     @ObservedObject var calendarManager:CalendarManager
+    @AppStorage("alternativeCalendar") private var alternativeCalendar: AlternativeCalendarType = SettingsManager.alternativeCalendar
 
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
     let calendar = Calendar.mondayBased
@@ -84,7 +85,7 @@ struct CalendarView: View {
                                     .font(.system(size: 12))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
 
-                                Text(!day.holidays.isEmpty ? day.holidays[0] : day.solar_term ?? day.lunar_short ?? "")
+                                Text(getAlternativeCalendarText(for: day))
                                     .font(.system(size: 8))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
                             }
@@ -115,4 +116,22 @@ struct CalendarView: View {
             formatter.dateFormat = "yyyy年MM月"
             return formatter.string(from: date)
         }
+
+    func getAlternativeCalendarText(for day: CalendarDay) -> String {
+        // Priority: holidays > solar terms > lunar calendar (if enabled)
+        if !day.holidays.isEmpty {
+            return day.holidays[0]
+        }
+
+        if let solarTerm = day.solar_term {
+            return solarTerm
+        }
+
+        // Only show lunar calendar if the setting is enabled
+        if alternativeCalendar == .chineseSimplified, let lunar = day.lunar_short {
+            return lunar
+        }
+
+        return ""
+    }
 }

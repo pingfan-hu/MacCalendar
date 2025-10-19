@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var selection:SettingsType? = .icon
+    @State private var selection:SettingsType? = .basicSettings
     
     var body: some View {
         HStack(spacing: 0) {

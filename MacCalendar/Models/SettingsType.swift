@@ -8,19 +8,16 @@
 import SwiftUI
 
 enum SettingsType:String,CaseIterable,Identifiable{
-    case icon = "菜单栏显示"
-    case launchAtLogin = "启动项"
+    case basicSettings = "基本设置"
     case about = "关于"
-    
+
     var id:String {self.rawValue}
-    
+
     @ViewBuilder
     var view:some View {
         switch self {
-        case .icon:
+        case .basicSettings:
             SettingsIconView()
-        case .launchAtLogin:
-            SettingsLaunchAtLoginView()
         case .about:
             SettingsAboutView()
         }
