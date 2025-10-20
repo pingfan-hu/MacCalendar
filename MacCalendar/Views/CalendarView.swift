@@ -9,18 +9,30 @@ import SwiftUI
 
 struct CalendarView: View {
     @ObservedObject var calendarManager:CalendarManager
+    @AppStorage("weekStartDay") private var weekStartDay: WeekStartDay = SettingsManager.weekStartDay
     @AppStorage("alternativeCalendar") private var alternativeCalendar: AlternativeCalendarType = SettingsManager.alternativeCalendar
 
     let columns = Array(repeating: GridItem(.flexible()), count: 7)
-    let calendar = Calendar.mondayBased
+
+    var calendar: Calendar {
+        Calendar.mondayBased
+    }
 
     @State private var hoveredDate: Date?
 
     var weekDays: [String] {
-        let calendar = Calendar.mondayBased
+        var calendar = Calendar.current
+
+        // Set locale based on language preference
+        let isChinese = SettingsManager.appLanguage == .chinese ||
+                       (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+
+        calendar.locale = isChinese ? Locale(identifier: "zh_CN") : Locale(identifier: "en_US")
+
         let symbols = calendar.veryShortWeekdaySymbols
-        let firstWeekday = calendar.firstWeekday
-        // Rotate array to match system's first weekday (1 = Sunday, 2 = Monday, etc.)
+        // Use the weekStartDay setting directly to ensure SwiftUI tracks the dependency
+        let firstWeekday = weekStartDay.firstWeekday
+        // Rotate array to match the first weekday (1 = Sunday, 2 = Monday, etc.)
         let rotated = Array(symbols.dropFirst(firstWeekday - 1)) + Array(symbols.prefix(firstWeekday - 1))
         return rotated
     }
@@ -36,6 +48,7 @@ struct CalendarView: View {
                     }
                 Spacer()
                 Text(ConvertTitle(date: calendarManager.currentMonth))
+                    .font(.customSize(16))
                     .onTapGesture {
                         calendarManager.goToCurrentMonth()
                     }
@@ -119,7 +132,16 @@ struct CalendarView: View {
     
     func ConvertTitle(date: Date) -> String {
             let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy年MM月"
+            // Use locale-aware formatting based on language setting
+            let isChinese = SettingsManager.appLanguage == .chinese ||
+                           (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+
+            if isChinese {
+                formatter.dateFormat = "yyyy年MM月"
+            } else {
+                formatter.dateFormat = "MMMM yyyy"
+                formatter.locale = Locale(identifier: "en_US")
+            }
             return formatter.string(from: date)
         }
 

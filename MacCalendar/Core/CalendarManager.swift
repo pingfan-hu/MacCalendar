@@ -16,8 +16,10 @@ class CalendarManager: ObservableObject {
     @Published var selectedDay: Date = Date()
     @Published var selectedDayEvents: [CalendarEvent] = []
     @Published var authorizationStatus: EKAuthorizationStatus = .notDetermined
-    
-    private let calendar = Calendar.mondayBased
+
+    private var calendar: Calendar {
+        Calendar.mondayBased
+    }
     private let eventStore = EKEventStore()
     private var cancellables = Set<AnyCancellable>()
 

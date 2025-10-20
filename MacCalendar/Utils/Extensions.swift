@@ -10,7 +10,9 @@ import SwiftUI
 
 extension Calendar {
     static var mondayBased: Calendar {
-        return Calendar.current
+        var calendar = Calendar.current
+        calendar.firstWeekday = SettingsManager.weekStartDay.firstWeekday
+        return calendar
     }
 }
 

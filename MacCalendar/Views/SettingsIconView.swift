@@ -10,79 +10,119 @@ import SwiftUI
 struct SettingsIconView: View {
     @AppStorage("displayMode") private var displayMode: DisplayMode = SettingsManager.displayMode
     @AppStorage("customFormatString") private var customFormatString: String = SettingsManager.customFormatString
+    @AppStorage("weekStartDay") private var weekStartDay: WeekStartDay = SettingsManager.weekStartDay
     @AppStorage("alternativeCalendar") private var alternativeCalendar: AlternativeCalendarType = SettingsManager.alternativeCalendar
+    @AppStorage("appLanguage") private var appLanguage: AppLanguage = SettingsManager.appLanguage
     @AppStorage("launchAtLogin") private var launchAtLogin = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 25) {
-            // 菜单栏显示设置
-            VStack(alignment: .leading, spacing: 12) {
-                Text("菜单栏显示")
-                    .font(.customSize(17))
+        ScrollView {
+            VStack(alignment: .leading, spacing: 15) {
+                // Menu bar display settings
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(LocalizationHelper.menuBarDisplay)
+                        .font(.customSize(17))
 
-                HStack {
-                    Text("显示类型:")
-                        .font(.customSize(14))
-                    Picker("", selection: $displayMode) {
-                        ForEach(DisplayMode.allCases) { mode in
-                            Text(mode.rawValue)
-                                .font(.customSize(14))
-                                .tag(mode)
-                        }
-                    }
-                }
-
-                if displayMode == .custom {
                     HStack {
-                        Text("显示格式:")
+                        Text(LocalizationHelper.displayType)
                             .font(.customSize(14))
-                        TextField("自定义格式:", text: $customFormatString)
-                            .font(.customSize(14))
-                    }
-                    Text("格式化代码参考: yyyy(年), MM(月), d(日), E(星期), HH(24时), h(12时), m(分), s(秒), a(上午/下午)")
-                        .font(.customCaption)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            Divider()
-
-            // 其他日历设置
-            VStack(alignment: .leading, spacing: 12) {
-                Text("日历显示")
-                    .font(.customSize(17))
-
-                HStack {
-                    Text("其他日历:")
-                        .font(.customSize(14))
-                    Picker("", selection: $alternativeCalendar) {
-                        ForEach(AlternativeCalendarType.allCases) { calendarType in
-                            Text(calendarType.rawValue)
-                                .font(.customSize(14))
-                                .tag(calendarType)
+                        Picker("", selection: $displayMode) {
+                            ForEach(DisplayMode.allCases) { mode in
+                                Text(mode.localizedName)
+                                    .font(.customSize(14))
+                                    .tag(mode)
+                            }
                         }
+                        .id(appLanguage)
+                    }
+
+                    if displayMode == .custom {
+                        HStack {
+                            Text(LocalizationHelper.displayFormat)
+                                .font(.customSize(14))
+                            TextField(LocalizationHelper.customFormat, text: $customFormatString)
+                                .font(.customSize(14))
+                        }
+                        Text(LocalizationHelper.formatReference)
+                            .font(.customCaption)
+                            .foregroundColor(.gray)
                     }
                 }
-            }
 
-            Divider()
+                Divider()
 
-            // 启动项设置
-            VStack(alignment: .leading, spacing: 12) {
-                Text("启动项")
-                    .font(.customSize(17))
+                // Calendar display settings
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(LocalizationHelper.calendarDisplay)
+                        .font(.customSize(17))
 
-                Toggle(isOn: $launchAtLogin) {
-                    Text("开机时自动启动")
-                        .font(.customSize(14))
+                    HStack {
+                        Text(LocalizationHelper.weekStartsFrom)
+                            .font(.customSize(14))
+                        Picker("", selection: $weekStartDay) {
+                            ForEach(WeekStartDay.allCases) { day in
+                                Text(day.localizedName)
+                                    .font(.customSize(14))
+                                    .tag(day)
+                            }
+                        }
+                        .id(appLanguage)
+                    }
+
+                    HStack {
+                        Text(LocalizationHelper.alternativeCalendar)
+                            .font(.customSize(14))
+                        Picker("", selection: $alternativeCalendar) {
+                            ForEach(AlternativeCalendarType.allCases) { calendarType in
+                                Text(calendarType.localizedName)
+                                    .font(.customSize(14))
+                                    .tag(calendarType)
+                            }
+                        }
+                        .id(appLanguage)
+                    }
                 }
-                .onChange(of: launchAtLogin) { oldValue, newValue in
-                    print("设置开机启动为: \(newValue)")
-                    LaunchAtLoginManager.setLaunchAtLogin(enabled: newValue)
-                }
-            }
 
-            Spacer()
+                Divider()
+
+                // Language settings
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(LocalizationHelper.language)
+                        .font(.customSize(17))
+
+                    HStack {
+                        Text(LocalizationHelper.language + ":")
+                            .font(.customSize(14))
+                        Picker("", selection: $appLanguage) {
+                            ForEach(AppLanguage.allCases) { language in
+                                Text(language.localizedName)
+                                    .font(.customSize(14))
+                                    .tag(language)
+                            }
+                        }
+                        .id(appLanguage)
+                    }
+                }
+
+                Divider()
+
+                // Startup settings
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(LocalizationHelper.startup)
+                        .font(.customSize(17))
+
+                    Toggle(isOn: $launchAtLogin) {
+                        Text(LocalizationHelper.launchAtLogin)
+                            .font(.customSize(14))
+                    }
+                    .onChange(of: launchAtLogin) { oldValue, newValue in
+                        print("设置开机启动为: \(newValue)")
+                        LaunchAtLoginManager.setLaunchAtLogin(enabled: newValue)
+                    }
+                }
+
+                Spacer()
+            }
         }
     }
 }

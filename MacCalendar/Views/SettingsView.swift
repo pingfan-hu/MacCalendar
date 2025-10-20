@@ -9,11 +9,12 @@ import SwiftUI
 
 struct SettingsView: View {
     @State private var selection:SettingsType? = .basicSettings
-    
+    @AppStorage("appLanguage") private var appLanguage: AppLanguage = SettingsManager.appLanguage
+
     var body: some View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 5) {
-                Text("应用设置")
+                Text(LocalizationHelper.appSettings)
                     .font(.customSize(17))
                     .padding(.horizontal)
                     .padding(.top, 6)
@@ -23,7 +24,7 @@ struct SettingsView: View {
                     Button(action: {
                         selection = setting
                     }) {
-                        Text(setting.rawValue)
+                        Text(setting.localizedName)
                             .font(.customSize(14))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal)
@@ -38,14 +39,17 @@ struct SettingsView: View {
                 Spacer()
             }
             .padding(10)
-            .frame(width: 140)
+            .frame(width: 160)
+            .id(appLanguage)
             
             Divider()
             
             ZStack {
                 selection?.view
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.top, 16)
+            .padding(.bottom)
         }
         .frame(width: 625, height: 440, alignment: .leading)
     }

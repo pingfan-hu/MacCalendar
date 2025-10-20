@@ -12,15 +12,17 @@ struct SettingsAboutView: View {
         VStack(alignment:.center,spacing: 12){
             Text("MacCalendar")
                 .font(.customTitle)
-            Text("完全免费且开源的macOS小而美菜单栏日历")
+            Text(LocalizationHelper.appDescription)
+                .font(.customSize(14))
                 .foregroundStyle(.secondary)
-            Text("Original version from bylinxx, forked by Pingfan Hu")
+            Text(LocalizationHelper.appCredit)
                 .font(.customCaption)
                 .foregroundStyle(.secondary)
             HStack{
-                Text("版本")
+                Text(LocalizationHelper.version)
                 Text(Bundle.main.appVersion ?? "")
             }
+            .font(.customSize(14))
             .foregroundStyle(.secondary)
             
             Link(destination: URL(string:"https://github.com/bylinxx/MacCalendar")!) {

@@ -9,9 +9,26 @@ import SwiftUI
 
 struct EventListItemView: View {
     let event:CalendarEvent
-    
+
     @State private var selectedEventId:String? = nil
-    
+
+    func formatTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        let isChinese = SettingsManager.appLanguage == .chinese ||
+                       (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+
+        if isChinese {
+            // Chinese format: 上午9:00 (AM/PM before time)
+            formatter.dateFormat = "a h:mm"
+            formatter.locale = Locale(identifier: "zh_CN")
+        } else {
+            // English format: 9:00 AM (AM/PM after time)
+            formatter.dateFormat = "h:mm a"
+            formatter.locale = Locale(identifier: "en_US")
+        }
+        return formatter.string(from: date)
+    }
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing:2){
@@ -19,10 +36,10 @@ struct EventListItemView: View {
                     Text(LocalizationHelper.allDay)
                 }
                 else{
-                    Text(event.startDate, style: .time)
+                    Text(formatTime(event.startDate))
                     Divider()
                         .frame(width:38)
-                    Text(event.endDate, style: .time)
+                    Text(formatTime(event.endDate))
                 }
             }
             .font(.customSize(12))

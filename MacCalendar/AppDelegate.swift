@@ -62,9 +62,9 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
 
         if event.type == .rightMouseUp {
             let menu = NSMenu()
-            menu.addItem(NSMenuItem(title: "设置", action: #selector(showSettingsWindow), keyEquivalent: ","))
+            menu.addItem(NSMenuItem(title: LocalizationHelper.settings, action: #selector(showSettingsWindow), keyEquivalent: ","))
             menu.addItem(NSMenuItem.separator())
-            menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+            menu.addItem(NSMenuItem(title: LocalizationHelper.quit, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
             
             statusItem.menu = menu
             statusItem.button?.performClick(nil)

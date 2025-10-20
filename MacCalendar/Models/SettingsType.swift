@@ -7,14 +7,23 @@
 
 import SwiftUI
 
-enum SettingsType:String,CaseIterable,Identifiable{
-    case basicSettings = "基本设置"
-    case about = "关于"
+enum SettingsType: String, CaseIterable, Identifiable {
+    case basicSettings
+    case about
 
-    var id:String {self.rawValue}
+    var id: String { self.rawValue }
+
+    var localizedName: String {
+        switch self {
+        case .basicSettings:
+            return LocalizationHelper.basicSettings
+        case .about:
+            return LocalizationHelper.about
+        }
+    }
 
     @ViewBuilder
-    var view:some View {
+    var view: some View {
         switch self {
         case .basicSettings:
             SettingsIconView()

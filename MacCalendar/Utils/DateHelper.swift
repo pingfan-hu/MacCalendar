@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 
 struct DateHelper{
@@ -21,32 +22,44 @@ struct DateHelper{
     /// - Parameters:
     ///   - startDate: 起始日期。
     ///   - endDate: 结束日期。
-    /// - Returns: 格式化后的时长字符串，例如 "5小时30分", "2小时", "45分"。
+    /// - Returns: 格式化后的时长字符串，例如 "5小时30分" / "5h 30m"。
     static func formattedDuration(from startDate: Date, to endDate: Date) -> String? {
         // 为了确保结果为正数，自动识别较早和较晚的日期
         let earlierDate = min(startDate, endDate)
         let laterDate = max(startDate, endDate)
-        
+
         let calendar = Calendar.mondayBased
-        
+
         let components = calendar.dateComponents([.hour, .minute], from: earlierDate, to: laterDate)
-        
+
         // 从计算结果中安全地获取小时和分钟数，如果为 nil 则默认为 0
         let hours = components.hour ?? 0
         let minutes = components.minute ?? 0
-        
-        if hours > 0 && minutes > 0 {
-            // 小时和分钟都存在
-            return "\(hours)小时\(minutes)分"
-        } else if hours > 0 {
-            // 只有小时（分钟为0）
-            return "\(hours)小时"
-        } else if minutes > 0 {
-            // 只有分钟（小时为0）
-            return "\(minutes)分"
+
+        // Check language setting
+        let isChinese = SettingsManager.appLanguage == .chinese ||
+                       (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+
+        if isChinese {
+            if hours > 0 && minutes > 0 {
+                return "\(hours)小时\(minutes)分"
+            } else if hours > 0 {
+                return "\(hours)小时"
+            } else if minutes > 0 {
+                return "\(minutes)分"
+            } else {
+                return nil
+            }
         } else {
-            // 时长为0
-            return nil
+            if hours > 0 && minutes > 0 {
+                return "\(hours)h \(minutes)m"
+            } else if hours > 0 {
+                return "\(hours)h"
+            } else if minutes > 0 {
+                return "\(minutes)m"
+            } else {
+                return nil
+            }
         }
     }
 }

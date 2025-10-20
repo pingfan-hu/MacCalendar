@@ -18,12 +18,26 @@ struct EventListView: View {
     @ObservedObject var calendarManager: CalendarManager
 
     @State private var contentHeight: CGFloat = 0
-    
+
+
+    func formatSelectedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        let isChinese = SettingsManager.appLanguage == .chinese ||
+                       (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+
+        if isChinese {
+            formatter.dateFormat = "yyyy年MM月dd日"
+        } else {
+            formatter.dateStyle = .long
+            formatter.locale = Locale(identifier: "en_US")
+        }
+        return formatter.string(from: date)
+    }
 
     var body: some View {
         if calendarManager.selectedDayEvents.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                Text(DateHelper.formatDate(date: calendarManager.selectedDay, format: "yyyy年MM月dd日"))
+                Text(formatSelectedDate(calendarManager.selectedDay))
                     .font(.customSize(17))
                 Text(LocalizationHelper.noEventsToday)
                     .font(.customSize(17))
@@ -33,7 +47,7 @@ struct EventListView: View {
         }
         else{
             VStack(alignment: .leading, spacing: 10) {
-                Text(DateHelper.formatDate(date: calendarManager.selectedDay, format: "yyyy年MM月dd日"))
+                Text(formatSelectedDate(calendarManager.selectedDay))
                     .font(.customSize(17))
                 ScrollView {
                     VStack(alignment: .leading, spacing: 6) {
