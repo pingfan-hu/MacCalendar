@@ -14,15 +14,17 @@ struct SettingsView: View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 5) {
                 Text("应用设置")
-                    .font(.headline)
+                    .font(.customSize(17))
                     .padding(.horizontal)
+                    .padding(.top, 6)
                     .padding(.bottom, 10)
-                
+
                 ForEach(SettingsType.allCases) { setting in
                     Button(action: {
                         selection = setting
                     }) {
                         Text(setting.rawValue)
+                            .font(.customSize(14))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal)
                             .padding(.vertical, 8)
@@ -36,7 +38,7 @@ struct SettingsView: View {
                 Spacer()
             }
             .padding(10)
-            .frame(width: 120)
+            .frame(width: 140)
             
             Divider()
             
@@ -45,6 +47,6 @@ struct SettingsView: View {
             }
             .padding()
         }
-        .frame(width: 500, height: 350, alignment: .leading)
+        .frame(width: 625, height: 440, alignment: .leading)
     }
 }

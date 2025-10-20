@@ -99,7 +99,7 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
             let settingsView = SettingsView()
             
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 420, height: 300),
+                contentRect: NSRect(x: 0, y: 0, width: 525, height: 375),
                 styleMask: [.titled, .closable],
                 backing: .buffered,
                 defer: false

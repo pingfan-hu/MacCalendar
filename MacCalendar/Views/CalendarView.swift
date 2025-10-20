@@ -50,11 +50,11 @@ struct CalendarView: View {
             
             HStack {
                     ForEach(weekDays, id: \.self) { day in
-                        VStack(spacing: 4) {
+                        VStack(spacing: 5) {
                             Text(day)
-                                .font(.system(size: 12))
+                                .font(.customSize(12))
                         }
-                        .frame(maxWidth: .infinity, minHeight: 35)
+                        .frame(maxWidth: .infinity, minHeight: 44)
                         .cornerRadius(6)
                     }
                 }
@@ -68,35 +68,41 @@ struct CalendarView: View {
                         if isToday{
                             Circle()
                                 .fill(Color.red)
-                                .frame(width: 35, height: 35, alignment: .center)
+                                .frame(width: 44, height: 44, alignment: .center)
+                                .offset(y: 2)
                         }
                         if calendar.isDate(day.date, equalTo: calendarManager.selectedDay, toGranularity: .day){
                             Circle()
                                 .fill(Color.red.opacity(0.3))
-                                .frame(width: 35, height: 35, alignment: .center)
+                                .frame(width: 44, height: 44, alignment: .center)
+                                .offset(y: 2)
                         }
                         if let hovered = hoveredDate, calendar.isDate(day.date, equalTo: hovered, toGranularity: .day), !isToday {
                             Circle()
                                 .fill(Color.gray.opacity(0.2))
-                                .frame(width: 35, height: 35, alignment: .center)
+                                .frame(width: 44, height: 44, alignment: .center)
+                                .offset(y: 2)
                         }
                             VStack(spacing: -2) {
                                 Text("\(calendar.component(.day, from: day.date))")
-                                    .font(.system(size: 12))
+                                    .font(.customSize(12))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
+                                    .frame(height: 14)
 
                                 Text(getAlternativeCalendarText(for: day))
-                                    .font(.system(size: 8))
+                                    .font(.customSize(8))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
+                                    .frame(height: 10)
                             }
-                            .frame(height:35)
+                            .frame(height:44)
                             .cornerRadius(6)
                             .contentShape(Rectangle())
                         if !day.events.isEmpty {
+                            let hasAlternativeText = !getAlternativeCalendarText(for: day).isEmpty
                             Circle()
                                 .fill(day.events.first!.color)
-                                .frame(width: 5, height: 5)
-                                .offset(y:15)
+                                .frame(width: 6, height: 6)
+                                .offset(y: hasAlternativeText ? 19 : 14)
                         }
                     }
                     .contentShape(Circle())
@@ -118,7 +124,12 @@ struct CalendarView: View {
         }
 
     func getAlternativeCalendarText(for day: CalendarDay) -> String {
-        // Priority: holidays > solar terms > lunar calendar (if enabled)
+        // Only show any alternative calendar info if the setting is enabled
+        guard alternativeCalendar == .chineseSimplified else {
+            return ""
+        }
+
+        // Priority: holidays > solar terms > lunar calendar
         if !day.holidays.isEmpty {
             return day.holidays[0]
         }
@@ -127,8 +138,7 @@ struct CalendarView: View {
             return solarTerm
         }
 
-        // Only show lunar calendar if the setting is enabled
-        if alternativeCalendar == .chineseSimplified, let lunar = day.lunar_short {
+        if let lunar = day.lunar_short {
             return lunar
         }
 

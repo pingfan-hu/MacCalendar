@@ -22,18 +22,21 @@ struct EventListView: View {
 
     var body: some View {
         if calendarManager.selectedDayEvents.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text(DateHelper.formatDate(date: calendarManager.selectedDay, format: "yyyy年MM月dd日"))
+                    .font(.customSize(17))
                 Text(LocalizationHelper.noEventsToday)
+                    .font(.customSize(17))
                     .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding([.leading,.trailing])
         }
         else{
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text(DateHelper.formatDate(date: calendarManager.selectedDay, format: "yyyy年MM月dd日"))
+                    .font(.customSize(17))
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 5) {
+                    VStack(alignment: .leading, spacing: 6) {
                         ForEach(calendarManager.selectedDayEvents, id: \.id) { event in
                             EventListItemView(event: event)
                         }
@@ -50,8 +53,7 @@ struct EventListView: View {
                 .onPreferenceChange(ContentHeightPreferenceKey.self) { height in
                     self.contentHeight = height
                 }
-                .frame(height: min(contentHeight, 500))
-                .animation(.easeInOut, value: contentHeight)
+                .frame(height: min(contentHeight, 625))
             }
         }
     }

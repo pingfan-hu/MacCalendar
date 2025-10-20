@@ -14,9 +14,9 @@ struct ContentView: View {
         VStack(spacing:0) {
             CalendarView(calendarManager: calendarManager)
             Divider()
-                .padding([.top,.bottom],10)
+                .padding([.top,.bottom],12)
             EventListView(calendarManager: calendarManager)
         }
-        .padding()
+        .padding(16)
     }
 }

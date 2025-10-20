@@ -21,30 +21,30 @@ struct EventListItemView: View {
                 else{
                     Text(event.startDate, style: .time)
                     Divider()
-                        .frame(width:30)
+                        .frame(width:38)
                     Text(event.endDate, style: .time)
                 }
             }
-            .font(.system(size: 10))
-            .frame(width:50, alignment: .leading)
-            
+            .font(.customSize(12))
+            .frame(width:62, alignment: .leading)
+
             HStack(spacing:0){
                 Rectangle()
-                    .cornerRadius(3)
-                    .frame(width: 3)
+                    .cornerRadius(4)
+                    .frame(width: 4)
                     .foregroundStyle(event.color.opacity(0.5))
                 VStack{
                     Text(event.title)
-                        .font(.system(size: 12))
+                        .font(.customSize(15))
                         .frame(maxWidth:.infinity,alignment: .leading)
                         .lineLimit(1)
                     Text(event.notes ?? "")
-                        .font(.caption2)
+                        .font(.customCaption2)
                         .frame(maxWidth:.infinity,alignment: .leading)
                         .lineLimit(1)
                 }
                 .frame(maxWidth:.infinity,alignment: .leading)
-                .padding(.init(top: 5, leading: 5, bottom: 5, trailing: 5))
+                .padding(.init(top: 6, leading: 6, bottom: 6, trailing: 6))
                 .background(
                     LinearGradient(
                         gradient: Gradient(colors: [event.color.opacity(0.2),event.color.opacity(0.1)]),
@@ -53,9 +53,9 @@ struct EventListItemView: View {
                     )
                 )
             }
-            .cornerRadius(5)
+            .cornerRadius(6)
         }
-        .padding([.top,.bottom],2)
+        .padding([.top,.bottom],3)
         .onTapGesture {
             selectedEventId = event.id
         }
