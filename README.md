@@ -1,35 +1,27 @@
-# MacCalendar (Enhanced Fork)
+# MacCalendar
 
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-EC662F?style=flat&logo=swift&logoColor=white)
-[![macOS](https://img.shields.io/badge/macOS-14.0+-green.svg)](https://github.com/bylinxx/MacCalendar)
+[![macOS](https://img.shields.io/badge/macOS-14.0+-green.svg)](https://github.com/pingfan-hu/MacCalendar)
+[![Latest Release](https://img.shields.io/github/v/release/pingfan-hu/MacCalendar)](https://github.com/pingfan-hu/MacCalendar/releases)
 
-> Forked from [bylinxx/MacCalendar](https://github.com/bylinxx/MacCalendar) with UI/UX improvements
-
-A free and open-source macOS menu bar calendar with Chinese lunar calendar support.
+A free and open-source menu bar calendar for macOS with Chinese lunar calendar support.
 
 ## Features
 
-- Menu bar-only app (no dock icon or main window)
-- Chinese lunar calendar, 24 solar terms, and holidays
-- System calendar integration (read-only)
-- Customizable menu bar display (icon/date/time/custom)
+MacCalendar lives in your menu bar and integrates with the system Calendar app. Click the icon to see your events, lunar dates, solar terms, and traditional holidays in a clean interface.
 
-## Improvements in This Fork
+Choose which calendars to display in Settings. Toggle the lunar calendar on or off based on your needs. Customize the menu bar display to show an icon, date, time, or custom format.
 
-- **Wider time column** - Fixed timestamp line breaks for Chinese AM/PM prefixes
-- **Left-aligned timestamps** - Better visual alignment for event times
-- **Larger menu bar icon** - More consistent with other macOS menu bar apps
-- **Auto-focus on open** - Popover is immediately interactive without extra click
-- **Hover effects** - Visual feedback when hovering over calendar dates
+Event locations with URLs (like Zoom links) open directly in your browser. Navigate months by scrolling on the calendar. Everything adapts to your system language and week start preference.
 
-## Build
+## Installation
 
-Open `MacCalendar.xcodeproj` in Xcode and build (Cmd+R), or:
+Download the latest DMG from the [Releases page](https://github.com/pingfan-hu/MacCalendar/releases). Drag MacCalendar to Applications and launch. The app is signed and notarized by Apple.
 
-```bash
-xcodebuild -project MacCalendar.xcodeproj -scheme MacCalendar build
-```
+Right-click the menu bar icon to access Settings.
 
 ## Credits
 
-Original project by [bylinxx](https://github.com/bylinxx/MacCalendar)
+Forked from [bylinxx/MacCalendar](https://github.com/bylinxx/MacCalendar) with UI improvements, calendar filtering, and smart URL handling.
+
+**License**: MIT | **Built with**: SwiftUI & EventKit
