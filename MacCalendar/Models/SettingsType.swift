@@ -9,6 +9,7 @@ import SwiftUI
 
 enum SettingsType: String, CaseIterable, Identifiable {
     case basicSettings
+    case calendars
     case about
 
     var id: String { self.rawValue }
@@ -17,6 +18,8 @@ enum SettingsType: String, CaseIterable, Identifiable {
         switch self {
         case .basicSettings:
             return LocalizationHelper.basicSettings
+        case .calendars:
+            return LocalizationHelper.calendars
         case .about:
             return LocalizationHelper.about
         }
@@ -27,6 +30,8 @@ enum SettingsType: String, CaseIterable, Identifiable {
         switch self {
         case .basicSettings:
             SettingsIconView()
+        case .calendars:
+            SettingsCalendarView()
         case .about:
             SettingsAboutView()
         }

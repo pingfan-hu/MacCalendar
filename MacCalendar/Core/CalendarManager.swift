@@ -125,11 +125,33 @@ class CalendarManager: ObservableObject {
         }
     }
     
+    // 获取可见的日历列表
+    private func getVisibleCalendars() -> [EKCalendar] {
+        // 从 UserDefaults 读取隐藏的日历 ID 列表
+        let hiddenCalendarIDs = UserDefaults.standard.stringArray(forKey: "HiddenCalendarIDs") ?? []
+
+        // 获取所有日历
+        let allCalendars = eventStore.calendars(for: .event)
+
+        // 过滤掉隐藏的日历
+        return allCalendars.filter { calendar in
+            !hiddenCalendarIDs.contains(calendar.calendarIdentifier)
+        }
+    }
+
     // 获取指定时间范围内的所有事件
     private func fetchEvents(from startDate: Date, to endDate: Date) async -> [CalendarEvent] {
-        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: nil)
+        // 只从可见的日历获取事件
+        let visibleCalendars = getVisibleCalendars()
+
+        // 如果没有可见的日历，返回空数组
+        guard !visibleCalendars.isEmpty else {
+            return []
+        }
+
+        let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: visibleCalendars)
         let ekEvents = eventStore.events(matching: predicate)
-        
+
         return ekEvents.map { ekEvent in
             CalendarEvent(
                 id: ekEvent.eventIdentifier,
@@ -143,6 +165,33 @@ class CalendarManager: ObservableObject {
                 url: ekEvent.url
             )
         }
+    }
+
+    // 公开方法：获取所有可用的日历
+    func getAllCalendars() -> [EKCalendar] {
+        return eventStore.calendars(for: .event)
+    }
+
+    // 公开方法：切换日历的可见性
+    func toggleCalendarVisibility(calendarID: String) {
+        var hiddenIDs = UserDefaults.standard.stringArray(forKey: "HiddenCalendarIDs") ?? []
+
+        if let index = hiddenIDs.firstIndex(of: calendarID) {
+            // 如果已经隐藏，则显示
+            hiddenIDs.remove(at: index)
+        } else {
+            // 如果当前可见，则隐藏
+            hiddenIDs.append(calendarID)
+        }
+
+        UserDefaults.standard.set(hiddenIDs, forKey: "HiddenCalendarIDs")
+        refreshEvents()
+    }
+
+    // 公开方法：检查日历是否可见
+    func isCalendarVisible(calendarID: String) -> Bool {
+        let hiddenIDs = UserDefaults.standard.stringArray(forKey: "HiddenCalendarIDs") ?? []
+        return !hiddenIDs.contains(calendarID)
     }
     
     // 将事件按日期（天）进行分组

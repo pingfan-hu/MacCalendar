@@ -50,6 +50,14 @@ struct LocalizationHelper {
         isChinese ? "基本设置" : "Basic Settings"
     }
 
+    static var calendars: String {
+        isChinese ? "日历选择" : "Calendars"
+    }
+
+    static var calendarSelectionDescription: String {
+        isChinese ? "选择要在 MacCalendar 中显示的日历" : "Select which calendars to display in MacCalendar"
+    }
+
     static var about: String {
         isChinese ? "关于" : "About"
     }
