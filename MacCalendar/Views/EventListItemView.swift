@@ -11,6 +11,7 @@ struct EventListItemView: View {
     let event:CalendarEvent
 
     @State private var selectedEventId:String? = nil
+    @State private var isPopoverDismissing = false
 
     func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
@@ -74,14 +75,29 @@ struct EventListItemView: View {
         }
         .padding([.top,.bottom],3)
         .onTapGesture {
-            selectedEventId = event.id
+            // Prevent re-opening immediately after dismissal
+            guard !isPopoverDismissing else { return }
+
+            withAnimation(.easeInOut(duration: 0.15)) {
+                // Toggle: if already showing this event, hide it; otherwise show it
+                if selectedEventId == event.id {
+                    selectedEventId = nil
+                } else {
+                    selectedEventId = event.id
+                }
+            }
         }
         .popover(
             isPresented: Binding(
-                get: { selectedEventId == event.id },
+                get: { selectedEventId == event.id && !isPopoverDismissing },
                 set: { isPresented in
                     if !isPresented {
+                        isPopoverDismissing = true
                         selectedEventId = nil
+                        // Reset the flag after a short delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            isPopoverDismissing = false
+                        }
                     }
                 }
             ),
