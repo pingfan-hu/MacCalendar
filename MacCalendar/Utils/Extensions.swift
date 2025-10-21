@@ -33,36 +33,42 @@ extension Bundle {
 }
 
 extension Font {
-    // Custom font name
+    // Custom font name - bundled with the app
     private static let customFontName = "TsangerJinKai02-W04"
+
+    // Helper to create custom font with system font fallback
+    private static func customFont(size: CGFloat) -> Font {
+        // .custom() automatically falls back to system font if the custom font is not available
+        return .custom(customFontName, size: size)
+    }
 
     // Semantic font sizes - increased by ~25% for better readability
     static var customTitle: Font {
-        .custom(customFontName, size: 35)
+        customFont(size: 35)
     }
 
     static var customHeadline: Font {
-        .custom(customFontName, size: 21)
+        customFont(size: 21)
     }
 
     static var customBody: Font {
-        .custom(customFontName, size: 21)
+        customFont(size: 21)
     }
 
     static var customSubheadline: Font {
-        .custom(customFontName, size: 19)
+        customFont(size: 19)
     }
 
     static var customCaption: Font {
-        .custom(customFontName, size: 15)
+        customFont(size: 15)
     }
 
     static var customCaption2: Font {
-        .custom(customFontName, size: 14)
+        customFont(size: 14)
     }
 
     // Specific sizes used in the app
     static func customSize(_ size: CGFloat) -> Font {
-        .custom(customFontName, size: size)
+        customFont(size: size)
     }
 }
