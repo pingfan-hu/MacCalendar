@@ -7,12 +7,6 @@
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>MacCalendar needs full access to your calendars to display your events.</string>
 	<key>ATSApplicationFontsPath</key>
-	<array>
-		<string>tsangerjinkai02w4.ttf</string>
-	</array>
-	<key>UIAppFonts</key>
-	<array>
-		<string>tsangerjinkai02w4.ttf</string>
-	</array>
+	<string>.</string>
 </dict>
 </plist>

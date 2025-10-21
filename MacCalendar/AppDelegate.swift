@@ -8,16 +8,20 @@
 import SwiftUI
 import AppKit
 import Combine
+import CoreText
 
 class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
     var statusItem: NSStatusItem!
     var popover: NSPopover!
     var settingsWindow: NSWindow?
-    
+
     private var calendarIcon = CalendarIcon()
     private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Register bundled custom font
+        registerCustomFont()
+
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
@@ -97,7 +101,7 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
     @objc func showSettingsWindow() {
         if settingsWindow == nil {
             let settingsView = SettingsView()
-            
+
             let window = NSWindow(
                 contentRect: NSRect(x: 0, y: 0, width: 525, height: 375),
                 styleMask: [.titled, .closable],
@@ -109,8 +113,26 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
             window.contentView = NSHostingView(rootView: settingsView)
             settingsWindow = window
         }
-        
+
         NSApp.activate(ignoringOtherApps: true)
         settingsWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    private func registerCustomFont() {
+        guard let fontURL = Bundle.main.url(forResource: "tsangerjinkai02w4", withExtension: "ttf") else {
+            print("❌ Custom font file not found in bundle")
+            return
+        }
+
+        var error: Unmanaged<CFError>?
+        let success = CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error)
+
+        if success {
+            print("✅ Custom font registered successfully: \(fontURL.lastPathComponent)")
+        } else {
+            if let error = error?.takeRetainedValue() {
+                print("❌ Failed to register custom font: \(error)")
+            }
+        }
     }
 }
