@@ -39,28 +39,11 @@ struct EventDetailView: View {
             .foregroundColor(.secondary)
 
             if let location = event.location {
-                HStack{
+                HStack(alignment: .top) {
                     Image(systemName: "location")
                         .font(.system(size: 13))
-                    Button(action: {
-                        let locationQuery = location.replacingOccurrences(of: "\n", with: " ").addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                        if let url = URL(string: "http://maps.apple.com/?q=\(locationQuery)") {
-                            NSWorkspace.shared.open(url)
-                        }
-                    }) {
-                        Text(location.replacingOccurrences(of: "\n", with: " "))
-                            .font(.customSize(13))
-                            .foregroundStyle(.blue)
-                            .underline()
-                    }
-                    .buttonStyle(.plain)
-                    .onHover { hovering in
-                        if hovering {
-                            NSCursor.pointingHand.push()
-                        } else {
-                            NSCursor.pop()
-                        }
-                    }
+                        .padding(.top, 2)
+                    ClickableTextView(text: location.replacingOccurrences(of: "\n", with: " "), fontSize: 13, textColor: .secondary)
                 }
             }
 
@@ -102,6 +85,7 @@ struct EventDetailView: View {
 struct ClickableTextView: View {
     let text: String
     let fontSize: CGFloat
+    var textColor: Color = .primary  // Default color for non-URL text
 
     var body: some View {
         let components = parseTextWithLinks(text)
@@ -125,6 +109,7 @@ struct ClickableTextView: View {
                 } else {
                     Text(component.text)
                         .font(.customSize(fontSize))
+                        .foregroundColor(textColor)
                 }
             }
         }
