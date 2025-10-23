@@ -108,8 +108,6 @@ struct CalendarView: View {
                                     .frame(height: 10)
                             }
                             .frame(height:44)
-                            .cornerRadius(6)
-                            .contentShape(Rectangle())
                         if !day.events.isEmpty {
                             let hasAlternativeText = !getAlternativeCalendarText(for: day).isEmpty
                             Circle()
@@ -118,6 +116,7 @@ struct CalendarView: View {
                                 .offset(y: hasAlternativeText ? 19 : 14)
                         }
                     }
+                    .frame(width: 44, height: 44)
                     .contentShape(Circle())
                     .onHover { isHovering in
                         hoveredDate = isHovering ? day.date : nil
