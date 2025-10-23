@@ -50,7 +50,7 @@ struct EventListItemView: View {
                 Rectangle()
                     .cornerRadius(4)
                     .frame(width: 4)
-                    .foregroundStyle(event.color.opacity(0.5))
+                    .foregroundStyle(event.color.opacity(0.6))
                 VStack{
                     Text(event.title)
                         .font(.customSize(15))
@@ -65,7 +65,7 @@ struct EventListItemView: View {
                 .padding(.init(top: 6, leading: 6, bottom: 6, trailing: 6))
                 .background(
                     LinearGradient(
-                        gradient: Gradient(colors: [event.color.opacity(0.2),event.color.opacity(0.1)]),
+                        gradient: Gradient(colors: [event.color.opacity(0.25),event.color.opacity(0.15)]),
                         startPoint: .leading,
                         endPoint: .trailing
                     )

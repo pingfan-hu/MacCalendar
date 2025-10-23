@@ -41,6 +41,39 @@ struct LocalizationHelper {
         isChinese ? "今天无日程" : "No events today"
     }
 
+    // Reminder strings
+    static var noDate: String {
+        isChinese ? "无日期" : "No Date"
+    }
+
+    static var noTime: String {
+        isChinese ? "无时间" : "No Time"
+    }
+
+    static var completed: String {
+        isChinese ? "已完成" : "Completed"
+    }
+
+    static var reminders: String {
+        isChinese ? "提醒事项" : "Reminders"
+    }
+
+    static var reminderLists: String {
+        isChinese ? "提醒列表" : "Reminder Lists"
+    }
+
+    static var reminderListSelectionDescription: String {
+        isChinese ? "选择要在 MacCalendar 中显示的提醒列表" : "Select which reminder lists to display in MacCalendar"
+    }
+
+    static var noRemindersToday: String {
+        isChinese ? "今天无提醒事项" : "No reminders today"
+    }
+
+    static var showReminders: String {
+        isChinese ? "显示提醒事项" : "Show Reminders"
+    }
+
     // Settings strings
     static var appSettings: String {
         isChinese ? "应用设置" : "App Settings"

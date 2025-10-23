@@ -144,10 +144,12 @@ struct CalendarView: View {
                                     .frame(height: 10)
                             }
                             .frame(height:44)
-                        if !day.events.isEmpty {
+                        if !day.events.isEmpty || !day.reminders.isEmpty {
                             let hasAlternativeText = !getAlternativeCalendarText(for: day).isEmpty
+                            // Use first event color if available, otherwise use first reminder color
+                            let dotColor = !day.events.isEmpty ? day.events.first!.color : day.reminders.first!.color
                             Circle()
-                                .fill(day.events.first!.color)
+                                .fill(dotColor)
                                 .frame(width: 6, height: 6)
                                 .offset(y: hasAlternativeText ? 19 : 14)
                         }
