@@ -79,21 +79,57 @@ struct CalendarView: View {
                     
                     ZStack{
                         if isToday{
+                            // Today: Slightly muted red gradient + shadow + inner white stroke
                             Circle()
-                                .fill(Color.red)
-                                .frame(width: 44, height: 44, alignment: .center)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color(red: 0.92, green: 0.26, blue: 0.21),
+                                            Color(red: 0.85, green: 0.22, blue: 0.18)
+                                        ]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 40, height: 40, alignment: .center)
+                                .shadow(color: Color(red: 0.92, green: 0.26, blue: 0.21).opacity(0.4), radius: 4, x: 0, y: 2)
+                                .offset(y: 2)
+
+                            // Inner white stroke for highlight
+                            Circle()
+                                .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
+                                .frame(width: 40, height: 40, alignment: .center)
                                 .offset(y: 2)
                         }
-                        if calendar.isDate(day.date, equalTo: calendarManager.selectedDay, toGranularity: .day){
+                        if calendar.isDate(day.date, equalTo: calendarManager.selectedDay, toGranularity: .day), !isToday {
+                            // Selected: Lighter red gradient + softer shadow (only if not today)
                             Circle()
-                                .fill(Color.red.opacity(0.3))
-                                .frame(width: 44, height: 44, alignment: .center)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color.red.opacity(0.35), Color.red.opacity(0.25)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 40, height: 40, alignment: .center)
+                                .shadow(color: Color.red.opacity(0.2), radius: 3, x: 0, y: 1)
                                 .offset(y: 2)
                         }
-                        if let hovered = hoveredDate, calendar.isDate(day.date, equalTo: hovered, toGranularity: .day), !isToday {
+                        if let hovered = hoveredDate,
+                           calendar.isDate(day.date, equalTo: hovered, toGranularity: .day),
+                           !isToday,
+                           !calendar.isDate(day.date, equalTo: calendarManager.selectedDay, toGranularity: .day) {
+                            // Hover: Subtle gradient + very soft shadow (only if not today and not selected)
                             Circle()
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(width: 44, height: 44, alignment: .center)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color.gray.opacity(0.25), Color.gray.opacity(0.15)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 40, height: 40, alignment: .center)
+                                .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
                                 .offset(y: 2)
                         }
                             VStack(spacing: -2) {
