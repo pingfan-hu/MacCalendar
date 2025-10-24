@@ -111,7 +111,7 @@ struct EventListView: View {
         } else {
             VStack(alignment: .leading, spacing: 10) {
                 Text(formatSelectedDate(calendarManager.selectedDay))
-                    .font(.customSize(17))
+                    .font(.customSize(15))
                 ScrollView {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(sortedItems) { item in

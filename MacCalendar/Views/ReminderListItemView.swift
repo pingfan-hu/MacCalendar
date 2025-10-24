@@ -66,7 +66,6 @@ struct ReminderListItemView: View {
             HStack(spacing: 0) {
                 // Colored bar on the left (matching event style)
                 Rectangle()
-                    .cornerRadius(4)
                     .frame(width: 4)
                     .foregroundStyle(reminder.color.opacity(0.6))
 
@@ -99,33 +98,32 @@ struct ReminderListItemView: View {
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(reminder.title)
-                            .font(.customSize(15))
+                            .font(.customSize(14))
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .lineLimit(1)
+                            .lineLimit(2)
                             .strikethrough(reminder.isCompleted)
                             .opacity(reminder.isCompleted ? 0.5 : 1.0)
 
                         if let notes = reminder.notes, !notes.isEmpty {
                             Text(notes)
-                                .font(.customCaption2)
+                                .font(.customSize(12))
+                                .foregroundColor(.secondary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .lineLimit(1)
+                                .lineLimit(2)
                                 .opacity(reminder.isCompleted ? 0.5 : 1.0)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.init(top: 6, leading: 6, bottom: 6, trailing: 6))
-                .frame(maxHeight: .infinity, alignment: .center)
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [reminder.color.opacity(0.25), reminder.color.opacity(0.15)]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
             }
-            .frame(maxHeight: .infinity)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [reminder.color.opacity(0.35), reminder.color.opacity(0.25)]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
             .cornerRadius(6)
         }
         .padding([.top, .bottom], 3)

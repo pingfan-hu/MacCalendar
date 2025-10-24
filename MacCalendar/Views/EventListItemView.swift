@@ -48,29 +48,32 @@ struct EventListItemView: View {
 
             HStack(spacing:0){
                 Rectangle()
-                    .cornerRadius(4)
                     .frame(width: 4)
                     .foregroundStyle(event.color.opacity(0.6))
-                VStack{
+                VStack(alignment: .leading, spacing: 2){
                     Text(event.title)
-                        .font(.customSize(15))
+                        .font(.customSize(14))
                         .frame(maxWidth:.infinity,alignment: .leading)
-                        .lineLimit(1)
-                    Text(event.notes ?? "")
-                        .font(.customCaption2)
-                        .frame(maxWidth:.infinity,alignment: .leading)
-                        .lineLimit(1)
+                        .lineLimit(2)
+
+                    if let notes = event.notes, !notes.isEmpty {
+                        Text(notes)
+                            .font(.customSize(12))
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth:.infinity,alignment: .leading)
+                            .lineLimit(2)
+                    }
                 }
                 .frame(maxWidth:.infinity,alignment: .leading)
                 .padding(.init(top: 6, leading: 6, bottom: 6, trailing: 6))
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [event.color.opacity(0.25),event.color.opacity(0.15)]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
             }
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [event.color.opacity(0.35),event.color.opacity(0.25)]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
             .cornerRadius(6)
         }
         .padding([.top,.bottom],3)
