@@ -34,7 +34,7 @@ extension Bundle {
 
 extension Font {
     // Custom font name - bundled with the app
-    private static let customFontName = "TsangerJinKai02-W04"
+    private static let customFontName = "LXGWWenKai-Medium"
 
     // Helper to create custom font with system font fallback
     private static func customFont(size: CGFloat) -> Font {

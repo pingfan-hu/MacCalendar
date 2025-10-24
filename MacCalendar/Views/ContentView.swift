@@ -24,6 +24,8 @@ enum AppTab: String, CaseIterable {
 struct TabButton: View {
     let tab: AppTab
     let isSelected: Bool
+    let cornerRadius: CGFloat
+    let corners: RectangleCornerRadii
     let action: () -> Void
 
     @State private var isHovering = false
@@ -44,7 +46,8 @@ struct TabButton: View {
             Text(tab.localizedName)
                 .font(.customSize(15))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .padding(.vertical, 6)
+                .padding(.horizontal, 8)
                 .background(
                     Group {
                         if isSelected {
@@ -58,6 +61,7 @@ struct TabButton: View {
                         }
                     }
                 )
+                .clipShape(UnevenRoundedRectangle(cornerRadii: corners))
                 .foregroundColor(isSelected ? .blue : .primary)
                 .contentShape(Rectangle())
                 .scaleEffect(isPressed ? 0.97 : 1.0)
@@ -74,26 +78,58 @@ struct TabButton: View {
 struct ContentView: View {
     @StateObject private var calendarManager = CalendarManager()
     @AppStorage("weekStartDay") private var weekStartDay: WeekStartDay = SettingsManager.weekStartDay
+    @AppStorage("isPopoverPinned") private var isPopoverPinned: Bool = SettingsManager.isPopoverPinned
     @State private var selectedTab: AppTab = .calendar
     @State private var eventMonitor: Any? = nil
 
     var body: some View {
         VStack(spacing: 0) {
-            // Tab bar
+            // Tab bar with pin button
             HStack(spacing: 0) {
-                ForEach(AppTab.allCases, id: \.self) { tab in
-                    TabButton(tab: tab, isSelected: selectedTab == tab) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedTab = tab
-                        }
+                TabButton(
+                    tab: .calendar,
+                    isSelected: selectedTab == .calendar,
+                    cornerRadius: 10,
+                    corners: RectangleCornerRadii(topLeading: 10, bottomLeading: 0, bottomTrailing: 0, topTrailing: 0)
+                ) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = .calendar
+                    }
+                }
+
+                // Pin button
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isPopoverPinned.toggle()
+                        // Notify AppDelegate to update popover behavior
+                        NotificationCenter.default.post(name: NSNotification.Name("PopoverPinStateChanged"), object: nil)
+                    }
+                }) {
+                    Image(systemName: isPopoverPinned ? "pin.fill" : "pin")
+                        .font(.system(size: 11))
+                        .foregroundColor(isPopoverPinned ? .blue : .secondary)
+                        .frame(width: 28)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(isPopoverPinned ? "Unpin window" : "Pin window")
+
+                TabButton(
+                    tab: .reminders,
+                    isSelected: selectedTab == .reminders,
+                    cornerRadius: 10,
+                    corners: RectangleCornerRadii(topLeading: 0, bottomLeading: 0, bottomTrailing: 0, topTrailing: 10)
+                ) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = .reminders
                     }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .padding(.horizontal, 8)
+            .padding(.top, 8)
 
             Divider()
-                .padding(.top, 8)
+                .padding(.top, 6)
 
             // Content area
             Group {

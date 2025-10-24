@@ -35,12 +35,14 @@ Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MacCa
 ### Core Components
 
 **CalendarManager** (`Core/CalendarManager.swift`):
-- `@MainActor` ObservableObject managing all calendar state and EventKit integration
-- Requests calendar access permissions (EKEventStore)
+- `@MainActor` ObservableObject managing all calendar and reminders state with EventKit integration
+- Requests calendar and reminders access permissions (EKEventStore with `requestFullAccessToEvents()` and `requestFullAccessToReminders()`)
 - Loads month data, generates date grid (with previous/next month padding)
 - Fetches events from macOS Calendar and groups them by day
-- Subscribes to `.EKEventStoreChanged` notifications for automatic refresh
-- Uses `Calendar.mondayBased` custom extension (Monday as first weekday)
+- Fetches reminders from macOS Reminders, including recurrence details
+- Provides `allIncompleteReminders` property for global reminders view (not limited by date range)
+- Subscribes to `.EKEventStoreChanged` notifications for automatic refresh of both events and reminders
+- Uses `Calendar.mondayBased` custom extension (configurable first weekday)
 
 **SettingsManager** (`Core/SettingsManager.swift`):
 - Uses `@AppStorage` for persistent settings
@@ -54,7 +56,7 @@ Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MacCa
 
 ### View Structure
 
-**ContentView**: Container with CalendarView and EventListView separated by divider
+**ContentView**: Container with CalendarView and EventListView/RemindersView separated by divider. Includes picker to switch between "Events" and "Reminders" tabs.
 
 **CalendarView**: Month grid with navigation arrows, shows lunar dates, holidays, solar terms, and event indicators
 
@@ -66,6 +68,19 @@ Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MacCa
 - Taps open EventDetailView popover
 - **UI Note**: Time column width is critical for Chinese AM/PM prefixes ("上午"/"下午"). Currently set to 62 points.
 - Includes debounce logic to prevent popover re-opening immediately after dismissal
+
+**RemindersView**:
+- Displays all incomplete reminders from CalendarManager (not limited to selected day)
+- Groups reminders into categories: Overdue, One-time, Weekly, Bi-weekly, Monthly, Quarterly, Semi-annually, Yearly, Multi-year, Future
+- Shows date ranges for recurring reminders (start date - end date of current occurrence)
+- Uses 62-point width time column consistent with EventListView
+- Each reminder rendered with ReminderListItemView (similar structure to EventListItemView)
+
+**ReminderListItemView**:
+- Shows reminder with priority indicators (!!!, !!, !), completion checkbox, title, notes, and list name
+- Supports URL detection in notes (opens in browser)
+- Taps open ReminderDetailView popover
+- Interactive completion toggle updates EventKit immediately
 
 ### Utilities
 
@@ -80,17 +95,20 @@ Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MacCa
 
 - **CalendarDay**: Represents a single day with date, lunar info, holidays, solar terms, and events
 - **CalendarEvent**: Wrapper around EKEvent with SwiftUI-friendly properties
+- **CalendarReminder**: Wrapper around EKReminder with properties for title, completion status, priority, due date, recurrence details (frequency/interval), list name, notes, and URLs
 - **CalendarIcon**: ObservableObject publishing display output for menu bar
 
 ## Key Technical Details
 
-### Calendar & Events
-- Uses EventKit for calendar integration (requires full access permission via `requestFullAccessToEvents()`)
+### Calendar, Events & Reminders
+- Uses EventKit for calendar and reminders integration (requires full access permissions via `requestFullAccessToEvents()` and `requestFullAccessToReminders()`)
 - Calendar visibility filtering: Users can hide/show specific calendars via Settings (stored in UserDefaults as "HiddenCalendarIDs")
+- Reminder list visibility filtering: Users can hide/show specific reminder lists via Settings (stored in UserDefaults as "HiddenReminderListIDs")
 - Calendar grid always shows complete weeks (42 days: current month + padding from adjacent months)
 - Lunar calendar calculations use `Calendar(identifier: .chinese)`
-- Auto-refreshes when calendar database changes via `.EKEventStoreChanged` notifications
-- Event locations with URLs (e.g., Zoom links) are clickable and open in browser
+- Auto-refreshes when calendar/reminders database changes via `.EKEventStoreChanged` notifications
+- Event and reminder locations/notes with URLs (e.g., Zoom links) are clickable and open in browser
+- **Reminders Recurrence**: Captures frequency (daily/weekly/monthly/yearly) and interval (e.g., every 3 months) from EKReminder recurrence rules for detailed grouping in UI
 
 ### Menu Bar & UI
 - Menu bar status item updates reactively via Combine publishers (1-second timer)
@@ -105,6 +123,10 @@ Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MacCa
 - Font extensions in `Extensions.swift` provide semantic sizes with automatic fallback to system font
 
 ### Permissions & Entitlements
-- **Critical**: App must be signed with entitlements file (`MacCalendar.entitlements`) for calendar access
-- Required entitlement: `com.apple.security.personal-information.calendars = true`
-- Info.plist requires both `NSCalendarsUsageDescription` and `NSCalendarsFullAccessUsageDescription`
+- **Critical**: App must be signed with entitlements file (`MacCalendar.entitlements`) for calendar and reminders access
+- Required entitlements:
+  - `com.apple.security.personal-information.calendars = true`
+  - `com.apple.security.personal-information.reminders = true` (if accessing reminders)
+- Info.plist requires:
+  - `NSCalendarsUsageDescription` and `NSCalendarsFullAccessUsageDescription` for calendar access
+  - `NSRemindersUsageDescription` and `NSRemindersFullAccessUsageDescription` for reminders access

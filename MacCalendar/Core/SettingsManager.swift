@@ -103,4 +103,5 @@ struct SettingsManager {
     @AppStorage("alternativeCalendar") static var alternativeCalendar: AlternativeCalendarType = .none
     @AppStorage("appLanguage") static var appLanguage: AppLanguage = .system
     @AppStorage("launchAtLogin") private var launchAtLogin = false
+    @AppStorage("isPopoverPinned") static var isPopoverPinned: Bool = false
 }

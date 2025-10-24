@@ -23,13 +23,13 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
         registerCustomFont()
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        
+
         if let button = statusItem.button {
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
             button.action = #selector(statusItemClicked)
             button.target = self
         }
-        
+
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             if event.modifierFlags.contains(.command) && event.characters == "," {
                 self?.showSettingsWindow()
@@ -37,12 +37,12 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
             }
             return event
         }
-        
+
         calendarIcon.$displayOutput
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] output in
                         guard let button = self?.statusItem.button else { return }
-                        
+
                         if output == CalendarIcon.iconModeIdentifier {
                             let config = NSImage.SymbolConfiguration(pointSize: 18, weight: .regular)
                             button.image = NSImage(systemSymbolName: "calendar", accessibilityDescription: "Calendar")?.withSymbolConfiguration(config)
@@ -56,9 +56,10 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
 
         popover = NSPopover()
         popover.appearance = NSAppearance(named: .aqua)
-        popover.behavior = .transient
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(closePopover), name: NSApplication.didResignActiveNotification, object: nil)
+        updatePopoverBehavior()
+
+        NotificationCenter.default.addObserver(self, selector: #selector(closePopoverIfNotPinned), name: NSApplication.didResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handlePinStateChanged), name: NSNotification.Name("PopoverPinStateChanged"), object: nil)
     }
 
     @objc func statusItemClicked(sender: NSStatusBarButton) {
@@ -83,6 +84,7 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
             if popover.isShown {
                 popover.performClose(nil)
             } else {
+                updatePopoverBehavior()
                 let hostingController = NSHostingController(rootView: ContentView())
                 hostingController.sizingOptions = .intrinsicContentSize
                 popover.contentViewController = hostingController
@@ -93,9 +95,27 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
             }
         }
     }
-    
+
     @objc func closePopover() {
         popover.performClose(nil)
+    }
+
+    @objc func closePopoverIfNotPinned() {
+        if !SettingsManager.isPopoverPinned {
+            popover.performClose(nil)
+        }
+    }
+
+    @objc func handlePinStateChanged() {
+        updatePopoverBehavior()
+    }
+
+    private func updatePopoverBehavior() {
+        if SettingsManager.isPopoverPinned {
+            popover.behavior = .semitransient
+        } else {
+            popover.behavior = .transient
+        }
     }
     
     @objc func showSettingsWindow() {
@@ -119,7 +139,7 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func registerCustomFont() {
-        guard let fontURL = Bundle.main.url(forResource: "tsangerjinkai02w4", withExtension: "ttf") else {
+        guard let fontURL = Bundle.main.url(forResource: "LXGWWenKai-Medium", withExtension: "ttf") else {
             print("❌ Custom font file not found in bundle")
             return
         }
