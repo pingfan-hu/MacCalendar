@@ -16,6 +16,7 @@ struct ReminderWithDate: Identifiable {
 struct RemindersView: View {
     @ObservedObject var calendarManager: CalendarManager
     @State private var contentHeight: CGFloat = 0
+    @Namespace private var animation
 
     // Get all incomplete reminders (from CalendarManager, not limited by date range)
     var remindersWithDates: [ReminderWithDate] {
@@ -157,9 +158,14 @@ struct RemindersView: View {
                                     }
                                     .frame(width: 62, alignment: .leading)
 
-                                    ReminderListItemView(reminder: item.reminder, hideTime: true)
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
                                 }
                                 .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
                             }
                         }
 
@@ -194,9 +200,14 @@ struct RemindersView: View {
                                     }
                                     .frame(width: 62, alignment: .leading)
 
-                                    ReminderListItemView(reminder: item.reminder, hideTime: true)
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
                                 }
                                 .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
                             }
                         }
                     }

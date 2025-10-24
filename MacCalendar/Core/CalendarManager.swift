@@ -25,6 +25,7 @@ class CalendarManager: ObservableObject {
     }
     private let eventStore = EKEventStore()
     private var cancellables = Set<AnyCancellable>()
+    let undoManager = UndoManager()
 
     init() {
         // 在初始化时，使用 Task 启动异步加载
@@ -81,11 +82,63 @@ class CalendarManager: ObservableObject {
     // 刷新所有未完成的提醒
     func refreshAllIncompleteReminders() async {
         guard remindersAuthorizationStatus == .fullAccess else {
-            allIncompleteReminders = []
+            await MainActor.run {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                    allIncompleteReminders = []
+                }
+            }
             return
         }
 
-        allIncompleteReminders = await fetchAllIncompleteReminders()
+        let reminders = await fetchAllIncompleteReminders()
+        await MainActor.run {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                allIncompleteReminders = reminders
+            }
+        }
+    }
+
+    // 切换提醒完成状态
+    func toggleReminderCompletion(reminderId: String, currentState: Bool) {
+        // Extract base ID (before underscore for recurring reminders)
+        let baseId: String
+        if let underscoreIndex = reminderId.lastIndex(of: "_") {
+            baseId = String(reminderId[..<underscoreIndex])
+        } else {
+            baseId = reminderId
+        }
+
+        // Find the reminder in EventStore
+        guard let ekReminder = eventStore.calendarItem(withIdentifier: baseId) as? EKReminder else {
+            return
+        }
+
+        let newState = !currentState
+
+        // Register undo action
+        undoManager.registerUndo(withTarget: self) { manager in
+            manager.toggleReminderCompletion(reminderId: reminderId, currentState: newState)
+        }
+
+        // Toggle completion
+        ekReminder.isCompleted = newState
+
+        do {
+            try eventStore.save(ekReminder, commit: true)
+
+            // Refresh all reminders after toggling with animation
+            Task {
+                await refreshAllIncompleteReminders()
+                await loadMonth(date: currentMonth)
+                await MainActor.run {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                        getEvent(date: selectedDay)
+                    }
+                }
+            }
+        } catch {
+            print("Error toggling reminder completion: \(error)")
+        }
     }
 
     // 加载月份数据

@@ -51,6 +51,7 @@ struct EventListView: View {
     @ObservedObject var calendarManager: CalendarManager
 
     @State private var contentHeight: CGFloat = 0
+    @Namespace private var animation
 
 
     func formatSelectedDate(_ date: Date) -> String {
@@ -114,12 +115,19 @@ struct EventListView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(sortedItems) { item in
-                            switch item {
-                            case .event(let event):
-                                EventListItemView(event: event)
-                            case .reminder(let reminder):
-                                ReminderListItemView(reminder: reminder)
+                            Group {
+                                switch item {
+                                case .event(let event):
+                                    EventListItemView(event: event)
+                                case .reminder(let reminder):
+                                    ReminderListItemView(reminder: reminder, calendarManager: calendarManager)
+                                }
                             }
+                            .transition(.asymmetric(
+                                insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                removal: .opacity.combined(with: .move(edge: .leading))
+                            ))
+                            .matchedGeometryEffect(id: item.id, in: animation)
                         }
                     }
                     .background(

@@ -10,9 +10,11 @@ import SwiftUI
 struct ReminderListItemView: View {
     let reminder: CalendarReminder
     var hideTime: Bool = false
+    @ObservedObject var calendarManager: CalendarManager
 
     @State private var selectedReminderId: String? = nil
     @State private var isPopoverDismissing = false
+    @State private var isHovering = false
 
     func formatDueTime(_ date: Date?) -> String {
         guard let date = date else {
@@ -73,13 +75,26 @@ struct ReminderListItemView: View {
                     // Checkmark circle indicator
                     ZStack {
                         Circle()
-                            .strokeBorder(reminder.color.opacity(0.6), lineWidth: 2)
+                            .strokeBorder(reminder.color.opacity(isHovering ? 1.0 : 0.6), lineWidth: 2)
                             .frame(width: 16, height: 16)
+                            .scaleEffect(isHovering ? 1.15 : 1.0)
                         if reminder.isCompleted {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(reminder.color)
                         }
+                    }
+                    .contentShape(Circle())
+                    .onHover { hovering in
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isHovering = hovering
+                        }
+                    }
+                    .onTapGesture {
+                        calendarManager.toggleReminderCompletion(
+                            reminderId: reminder.id,
+                            currentState: reminder.isCompleted
+                        )
                     }
 
                     VStack(alignment: .leading, spacing: 2) {

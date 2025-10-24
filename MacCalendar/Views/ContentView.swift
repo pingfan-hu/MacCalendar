@@ -25,6 +25,7 @@ struct ContentView: View {
     @StateObject private var calendarManager = CalendarManager()
     @AppStorage("weekStartDay") private var weekStartDay: WeekStartDay = SettingsManager.weekStartDay
     @State private var selectedTab: AppTab = .calendar
+    @State private var eventMonitor: Any? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -72,6 +73,28 @@ struct ContentView: View {
         }
         .onChange(of: weekStartDay) { oldValue, newValue in
             calendarManager.refreshEvents()
+        }
+        .onAppear {
+            eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                if event.modifierFlags.contains(.command) {
+                    if event.modifierFlags.contains(.shift) && event.characters == "Z" {
+                        // Cmd+Shift+Z - Redo
+                        calendarManager.undoManager.redo()
+                        return nil
+                    } else if event.characters == "z" {
+                        // Cmd+Z - Undo
+                        calendarManager.undoManager.undo()
+                        return nil
+                    }
+                }
+                return event
+            }
+        }
+        .onDisappear {
+            if let monitor = eventMonitor {
+                NSEvent.removeMonitor(monitor)
+                eventMonitor = nil
+            }
         }
     }
 }
