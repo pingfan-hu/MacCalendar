@@ -94,6 +94,10 @@ struct LocalizationHelper {
         isChinese ? "循环" : "Recurring"
     }
 
+    static var upcomingReminders: String {
+        isChinese ? "即将开始" : "Upcoming"
+    }
+
     // Settings strings
     static var appSettings: String {
         isChinese ? "应用设置" : "App Settings"

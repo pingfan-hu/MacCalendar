@@ -65,6 +65,28 @@ struct RemindersView: View {
             }
     }
 
+    var upcomingRecurringReminders: [ReminderWithDate] {
+        let today = Calendar.current.startOfDay(for: Date())
+        return remindersWithDates
+            .filter { $0.reminder.isRecurring }
+            .filter { item in
+                // Only show recurring reminders with due date in the future
+                guard let dueDate = item.reminder.dueDate else {
+                    return false // Don't show reminders without due date here
+                }
+                let dueDateStart = Calendar.current.startOfDay(for: dueDate)
+                return dueDateStart > today
+            }
+            .sorted { r1, r2 in
+                if let d1 = r1.reminder.dueDate, let d2 = r2.reminder.dueDate {
+                    return d1 < d2
+                }
+                if r1.reminder.dueDate != nil { return true }
+                if r2.reminder.dueDate != nil { return false }
+                return false
+            }
+    }
+
     func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         let isChinese = SettingsManager.appLanguage == .chinese ||
@@ -132,7 +154,7 @@ struct RemindersView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if oneTimeReminders.isEmpty && recurringReminders.isEmpty {
+            if oneTimeReminders.isEmpty && recurringReminders.isEmpty && upcomingRecurringReminders.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "checkmark.circle")
                         .font(.system(size: 40))
@@ -191,6 +213,48 @@ struct RemindersView: View {
                                 .padding(.leading, 16)
 
                             ForEach(recurringReminders) { item in
+                                HStack(alignment: .center, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        // Date range split into two lines
+                                        let dateLines = getDateRangeLines(for: item)
+                                        ForEach(0..<dateLines.count, id: \.self) { index in
+                                            Text(dateLines[index])
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
+                                            Text(formatTime(dueDate))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(width: 62, alignment: .leading)
+
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
+                                }
+                                .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
+                            }
+                        }
+
+                        // Upcoming recurring reminders
+                        if !upcomingRecurringReminders.isEmpty {
+                            if !oneTimeReminders.isEmpty || !recurringReminders.isEmpty {
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            Text(LocalizationHelper.upcomingReminders)
+                                .font(.customSize(14))
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 16)
+
+                            ForEach(upcomingRecurringReminders) { item in
                                 HStack(alignment: .center, spacing: 8) {
                                     VStack(alignment: .leading, spacing: 2) {
                                         // Date range split into two lines
