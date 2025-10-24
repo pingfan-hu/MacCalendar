@@ -86,16 +86,40 @@ struct LocalizationHelper {
         isChinese ? "提醒" : "Reminders"
     }
 
+    static var overdueReminders: String {
+        isChinese ? "逾期" : "Overdue"
+    }
+
     static var oneTimeReminders: String {
         isChinese ? "单次" : "One-time"
     }
 
-    static var recurringReminders: String {
-        isChinese ? "循环" : "Recurring"
+    static var weeklyReminders: String {
+        isChinese ? "每周" : "Weekly"
     }
 
-    static var upcomingReminders: String {
-        isChinese ? "即将开始" : "Upcoming"
+    static var biweeklyReminders: String {
+        isChinese ? "每两周" : "Bi-weekly"
+    }
+
+    static var monthlyReminders: String {
+        isChinese ? "每月" : "Monthly"
+    }
+
+    static var quarterlyReminders: String {
+        isChinese ? "每季" : "Quarterly"
+    }
+
+    static var semiannuallyReminders: String {
+        isChinese ? "每半年" : "Semi-annually"
+    }
+
+    static var yearlyReminders: String {
+        isChinese ? "每年" : "Yearly"
+    }
+
+    static var futureReminders: String {
+        isChinese ? "将来" : "Future"
     }
 
     // Settings strings

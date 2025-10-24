@@ -31,29 +31,16 @@ struct RemindersView: View {
 
     // Split into one-time and recurring
     var oneTimeReminders: [ReminderWithDate] {
+        let today = Calendar.current.startOfDay(for: Date())
         return remindersWithDates
             .filter { !$0.reminder.isRecurring }
-            .sorted { r1, r2 in
-                if let d1 = r1.reminder.dueDate, let d2 = r2.reminder.dueDate {
-                    return d1 < d2
-                }
-                if r1.reminder.dueDate != nil { return true }
-                if r2.reminder.dueDate != nil { return false }
-                return false
-            }
-    }
-
-    var recurringReminders: [ReminderWithDate] {
-        let today = Calendar.current.startOfDay(for: Date())
-        return remindersWithDates
-            .filter { $0.reminder.isRecurring }
             .filter { item in
-                // Only show recurring reminders with due date today or earlier
+                // Exclude overdue one-time reminders
                 guard let dueDate = item.reminder.dueDate else {
-                    return true // Show reminders without due date
+                    return true
                 }
                 let dueDateStart = Calendar.current.startOfDay(for: dueDate)
-                return dueDateStart <= today
+                return dueDateStart >= today
             }
             .sorted { r1, r2 in
                 if let d1 = r1.reminder.dueDate, let d2 = r2.reminder.dueDate {
@@ -65,26 +52,183 @@ struct RemindersView: View {
             }
     }
 
-    var upcomingRecurringReminders: [ReminderWithDate] {
+    // Helper to check if reminder is not in the future
+    func isNotFuture(_ item: ReminderWithDate) -> Bool {
         let today = Calendar.current.startOfDay(for: Date())
-        return remindersWithDates
-            .filter { $0.reminder.isRecurring }
+        guard let dueDate = item.reminder.dueDate else {
+            return true // Show reminders without due date
+        }
+        let dueDateStart = Calendar.current.startOfDay(for: dueDate)
+        return dueDateStart <= today
+    }
+
+    // Helper to sort reminders by date
+    func sortedByDate(_ reminders: [ReminderWithDate]) -> [ReminderWithDate] {
+        return reminders.sorted { r1, r2 in
+            if let d1 = r1.reminder.dueDate, let d2 = r2.reminder.dueDate {
+                return d1 < d2
+            }
+            if r1.reminder.dueDate != nil { return true }
+            if r2.reminder.dueDate != nil { return false }
+            return false
+        }
+    }
+
+    // Helper to check if recurring reminder is overdue (entire date range is before today)
+    func isRecurringOverdue(_ item: ReminderWithDate) -> Bool {
+        guard let startDate = item.reminder.dueDate,
+              let frequency = item.reminder.recurrenceFrequency,
+              let interval = item.reminder.recurrenceInterval else {
+            return false
+        }
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        var endDate: Date?
+        switch frequency {
+        case "daily":
+            endDate = calendar.date(byAdding: .day, value: interval, to: startDate)
+        case "weekly":
+            endDate = calendar.date(byAdding: .weekOfYear, value: interval, to: startDate)
+        case "monthly":
+            endDate = calendar.date(byAdding: .month, value: interval, to: startDate)
+        case "yearly":
+            endDate = calendar.date(byAdding: .year, value: interval, to: startDate)
+        default:
+            return false
+        }
+
+        if let calculatedEndDate = endDate,
+           let actualEndDate = calendar.date(byAdding: .day, value: -1, to: calculatedEndDate) {
+            let actualEndDateStart = calendar.startOfDay(for: actualEndDate)
+            return actualEndDateStart < today
+        }
+
+        return false
+    }
+
+    var overdueReminders: [ReminderWithDate] {
+        let today = Calendar.current.startOfDay(for: Date())
+
+        // Overdue one-time reminders
+        let overdueOneTime = remindersWithDates
+            .filter { !$0.reminder.isRecurring }
             .filter { item in
-                // Only show recurring reminders with due date in the future
                 guard let dueDate = item.reminder.dueDate else {
-                    return false // Don't show reminders without due date here
+                    return false
                 }
                 let dueDateStart = Calendar.current.startOfDay(for: dueDate)
-                return dueDateStart > today
+                return dueDateStart < today
             }
-            .sorted { r1, r2 in
-                if let d1 = r1.reminder.dueDate, let d2 = r2.reminder.dueDate {
-                    return d1 < d2
+
+        // Overdue recurring reminders
+        let overdueRecurring = remindersWithDates
+            .filter { $0.reminder.isRecurring }
+            .filter { isRecurringOverdue($0) }
+
+        return sortedByDate(overdueOneTime + overdueRecurring)
+    }
+
+    var weeklyReminders: [ReminderWithDate] {
+        return sortedByDate(
+            remindersWithDates
+                .filter { $0.reminder.isRecurring }
+                .filter { isNotFuture($0) }
+                .filter { !isRecurringOverdue($0) }
+                .filter { $0.reminder.recurrenceFrequency == "weekly" && $0.reminder.recurrenceInterval == 1 }
+        )
+    }
+
+    var biweeklyReminders: [ReminderWithDate] {
+        return sortedByDate(
+            remindersWithDates
+                .filter { $0.reminder.isRecurring }
+                .filter { isNotFuture($0) }
+                .filter { !isRecurringOverdue($0) }
+                .filter { $0.reminder.recurrenceFrequency == "weekly" && $0.reminder.recurrenceInterval == 2 }
+        )
+    }
+
+    var monthlyReminders: [ReminderWithDate] {
+        return sortedByDate(
+            remindersWithDates
+                .filter { $0.reminder.isRecurring }
+                .filter { isNotFuture($0) }
+                .filter { !isRecurringOverdue($0) }
+                .filter { $0.reminder.recurrenceFrequency == "monthly" && $0.reminder.recurrenceInterval == 1 }
+        )
+    }
+
+    var quarterlyReminders: [ReminderWithDate] {
+        return sortedByDate(
+            remindersWithDates
+                .filter { $0.reminder.isRecurring }
+                .filter { isNotFuture($0) }
+                .filter { !isRecurringOverdue($0) }
+                .filter { $0.reminder.recurrenceFrequency == "monthly" && $0.reminder.recurrenceInterval == 3 }
+        )
+    }
+
+    var semiannuallyReminders: [ReminderWithDate] {
+        return sortedByDate(
+            remindersWithDates
+                .filter { $0.reminder.isRecurring }
+                .filter { isNotFuture($0) }
+                .filter { !isRecurringOverdue($0) }
+                .filter { $0.reminder.recurrenceFrequency == "monthly" && $0.reminder.recurrenceInterval == 6 }
+        )
+    }
+
+    var yearlyReminders: [ReminderWithDate] {
+        return sortedByDate(
+            remindersWithDates
+                .filter { $0.reminder.isRecurring }
+                .filter { isNotFuture($0) }
+                .filter { !isRecurringOverdue($0) }
+                .filter { $0.reminder.recurrenceFrequency == "yearly" && $0.reminder.recurrenceInterval == 1 }
+        )
+    }
+
+    var multiYearRemindersGrouped: [(interval: Int, reminders: [ReminderWithDate])] {
+        let multiYearReminders = remindersWithDates
+            .filter { $0.reminder.isRecurring }
+            .filter { isNotFuture($0) }
+            .filter { !isRecurringOverdue($0) }
+            .filter { $0.reminder.recurrenceFrequency == "yearly" && ($0.reminder.recurrenceInterval ?? 1) > 1 }
+
+        // Group by interval
+        let grouped = Dictionary(grouping: multiYearReminders) { $0.reminder.recurrenceInterval ?? 2 }
+
+        // Sort by interval and return as array of tuples
+        return grouped.sorted { $0.key < $1.key }.map { (interval: $0.key, reminders: sortedByDate($0.value)) }
+    }
+
+    var futureReminders: [ReminderWithDate] {
+        let today = Calendar.current.startOfDay(for: Date())
+        return sortedByDate(
+            remindersWithDates
+                .filter { $0.reminder.isRecurring }
+                .filter { item in
+                    // Only show recurring reminders with due date in the future
+                    guard let dueDate = item.reminder.dueDate else {
+                        return false // Don't show reminders without due date here
+                    }
+                    let dueDateStart = Calendar.current.startOfDay(for: dueDate)
+                    return dueDateStart > today
                 }
-                if r1.reminder.dueDate != nil { return true }
-                if r2.reminder.dueDate != nil { return false }
-                return false
-            }
+        )
+    }
+
+    func getMultiYearLabel(interval: Int) -> String {
+        let isChinese = SettingsManager.appLanguage == .chinese ||
+                       (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+
+        if isChinese {
+            return "每\(interval)年"
+        } else {
+            return "Every \(interval) Years"
+        }
     }
 
     func formatDate(_ date: Date) -> String {
@@ -154,7 +298,9 @@ struct RemindersView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if oneTimeReminders.isEmpty && recurringReminders.isEmpty && upcomingRecurringReminders.isEmpty {
+            if overdueReminders.isEmpty && oneTimeReminders.isEmpty && weeklyReminders.isEmpty && biweeklyReminders.isEmpty &&
+               monthlyReminders.isEmpty && quarterlyReminders.isEmpty && semiannuallyReminders.isEmpty &&
+               yearlyReminders.isEmpty && multiYearRemindersGrouped.isEmpty && futureReminders.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "checkmark.circle")
                         .font(.system(size: 40))
@@ -167,8 +313,57 @@ struct RemindersView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
+                        // Overdue reminders
+                        if !overdueReminders.isEmpty {
+                            Text(LocalizationHelper.overdueReminders)
+                                .font(.customSize(14))
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 16)
+
+                            ForEach(overdueReminders) { item in
+                                HStack(alignment: .center, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        if item.reminder.isRecurring {
+                                            // Date range split into two lines for recurring
+                                            let dateLines = getDateRangeLines(for: item)
+                                            ForEach(0..<dateLines.count, id: \.self) { index in
+                                                Text(dateLines[index])
+                                                    .font(.customSize(12))
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        } else {
+                                            // Single date for one-time
+                                            Text(formatDate(item.date))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
+                                            Text(formatTime(dueDate))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(width: 62, alignment: .leading)
+
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
+                                }
+                                .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
+                            }
+                        }
+
                         // One-time reminders
                         if !oneTimeReminders.isEmpty {
+                            if !overdueReminders.isEmpty {
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
                             Text(LocalizationHelper.oneTimeReminders)
                                 .font(.customSize(14))
                                 .foregroundColor(.secondary)
@@ -200,19 +395,19 @@ struct RemindersView: View {
                             }
                         }
 
-                        // Recurring reminders
-                        if !recurringReminders.isEmpty {
-                            if !oneTimeReminders.isEmpty {
+                        // Weekly reminders
+                        if !weeklyReminders.isEmpty {
+                            if !overdueReminders.isEmpty || !oneTimeReminders.isEmpty {
                                 Divider()
                                     .padding(.vertical, 8)
                             }
 
-                            Text(LocalizationHelper.recurringReminders)
+                            Text(LocalizationHelper.weeklyReminders)
                                 .font(.customSize(14))
                                 .foregroundColor(.secondary)
                                 .padding(.leading, 16)
 
-                            ForEach(recurringReminders) { item in
+                            ForEach(weeklyReminders) { item in
                                 HStack(alignment: .center, spacing: 8) {
                                     VStack(alignment: .leading, spacing: 2) {
                                         // Date range split into two lines
@@ -242,19 +437,271 @@ struct RemindersView: View {
                             }
                         }
 
-                        // Upcoming recurring reminders
-                        if !upcomingRecurringReminders.isEmpty {
-                            if !oneTimeReminders.isEmpty || !recurringReminders.isEmpty {
+                        // Bi-weekly reminders
+                        if !biweeklyReminders.isEmpty {
+                            if !overdueReminders.isEmpty || !oneTimeReminders.isEmpty || !weeklyReminders.isEmpty {
                                 Divider()
                                     .padding(.vertical, 8)
                             }
 
-                            Text(LocalizationHelper.upcomingReminders)
+                            Text(LocalizationHelper.biweeklyReminders)
                                 .font(.customSize(14))
                                 .foregroundColor(.secondary)
                                 .padding(.leading, 16)
 
-                            ForEach(upcomingRecurringReminders) { item in
+                            ForEach(biweeklyReminders) { item in
+                                HStack(alignment: .center, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        // Date range split into two lines
+                                        let dateLines = getDateRangeLines(for: item)
+                                        ForEach(0..<dateLines.count, id: \.self) { index in
+                                            Text(dateLines[index])
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
+                                            Text(formatTime(dueDate))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(width: 62, alignment: .leading)
+
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
+                                }
+                                .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
+                            }
+                        }
+
+                        // Monthly reminders
+                        if !monthlyReminders.isEmpty {
+                            if !overdueReminders.isEmpty || !oneTimeReminders.isEmpty || !weeklyReminders.isEmpty || !biweeklyReminders.isEmpty {
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            Text(LocalizationHelper.monthlyReminders)
+                                .font(.customSize(14))
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 16)
+
+                            ForEach(monthlyReminders) { item in
+                                HStack(alignment: .center, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        // Date range split into two lines
+                                        let dateLines = getDateRangeLines(for: item)
+                                        ForEach(0..<dateLines.count, id: \.self) { index in
+                                            Text(dateLines[index])
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
+                                            Text(formatTime(dueDate))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(width: 62, alignment: .leading)
+
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
+                                }
+                                .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
+                            }
+                        }
+
+                        // Quarterly reminders
+                        if !quarterlyReminders.isEmpty {
+                            if !overdueReminders.isEmpty || !oneTimeReminders.isEmpty || !weeklyReminders.isEmpty || !biweeklyReminders.isEmpty || !monthlyReminders.isEmpty {
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            Text(LocalizationHelper.quarterlyReminders)
+                                .font(.customSize(14))
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 16)
+
+                            ForEach(quarterlyReminders) { item in
+                                HStack(alignment: .center, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        // Date range split into two lines
+                                        let dateLines = getDateRangeLines(for: item)
+                                        ForEach(0..<dateLines.count, id: \.self) { index in
+                                            Text(dateLines[index])
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
+                                            Text(formatTime(dueDate))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(width: 62, alignment: .leading)
+
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
+                                }
+                                .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
+                            }
+                        }
+
+                        // Semi-annually reminders
+                        if !semiannuallyReminders.isEmpty {
+                            if !overdueReminders.isEmpty || !oneTimeReminders.isEmpty || !weeklyReminders.isEmpty || !biweeklyReminders.isEmpty || !monthlyReminders.isEmpty || !quarterlyReminders.isEmpty {
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            Text(LocalizationHelper.semiannuallyReminders)
+                                .font(.customSize(14))
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 16)
+
+                            ForEach(semiannuallyReminders) { item in
+                                HStack(alignment: .center, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        // Date range split into two lines
+                                        let dateLines = getDateRangeLines(for: item)
+                                        ForEach(0..<dateLines.count, id: \.self) { index in
+                                            Text(dateLines[index])
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
+                                            Text(formatTime(dueDate))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(width: 62, alignment: .leading)
+
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
+                                }
+                                .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
+                            }
+                        }
+
+                        // Yearly reminders
+                        if !yearlyReminders.isEmpty {
+                            if !overdueReminders.isEmpty || !oneTimeReminders.isEmpty || !weeklyReminders.isEmpty || !biweeklyReminders.isEmpty || !monthlyReminders.isEmpty || !quarterlyReminders.isEmpty || !semiannuallyReminders.isEmpty {
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            Text(LocalizationHelper.yearlyReminders)
+                                .font(.customSize(14))
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 16)
+
+                            ForEach(yearlyReminders) { item in
+                                HStack(alignment: .center, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        // Date range split into two lines
+                                        let dateLines = getDateRangeLines(for: item)
+                                        ForEach(0..<dateLines.count, id: \.self) { index in
+                                            Text(dateLines[index])
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
+                                            Text(formatTime(dueDate))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(width: 62, alignment: .leading)
+
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
+                                }
+                                .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
+                            }
+                        }
+
+                        // Multi-year reminders (every 2+ years)
+                        ForEach(multiYearRemindersGrouped, id: \.interval) { group in
+                            if !overdueReminders.isEmpty || !oneTimeReminders.isEmpty || !weeklyReminders.isEmpty || !biweeklyReminders.isEmpty || !monthlyReminders.isEmpty || !quarterlyReminders.isEmpty || !semiannuallyReminders.isEmpty || !yearlyReminders.isEmpty || multiYearRemindersGrouped.first?.interval != group.interval {
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            Text(getMultiYearLabel(interval: group.interval))
+                                .font(.customSize(14))
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 16)
+
+                            ForEach(group.reminders) { item in
+                                HStack(alignment: .center, spacing: 8) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        // Date range split into two lines
+                                        let dateLines = getDateRangeLines(for: item)
+                                        ForEach(0..<dateLines.count, id: \.self) { index in
+                                            Text(dateLines[index])
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
+                                            Text(formatTime(dueDate))
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(width: 62, alignment: .leading)
+
+                                    ReminderListItemView(reminder: item.reminder, hideTime: true, calendarManager: calendarManager)
+                                }
+                                .padding(.horizontal, 16)
+                                .transition(.asymmetric(
+                                    insertion: .opacity.combined(with: .scale(scale: 0.8)),
+                                    removal: .opacity.combined(with: .move(edge: .leading))
+                                ))
+                                .matchedGeometryEffect(id: item.id, in: animation)
+                            }
+                        }
+
+                        // Future reminders
+                        if !futureReminders.isEmpty {
+                            if !overdueReminders.isEmpty || !oneTimeReminders.isEmpty || !weeklyReminders.isEmpty || !biweeklyReminders.isEmpty || !monthlyReminders.isEmpty || !quarterlyReminders.isEmpty || !semiannuallyReminders.isEmpty || !yearlyReminders.isEmpty || !multiYearRemindersGrouped.isEmpty {
+                                Divider()
+                                    .padding(.vertical, 8)
+                            }
+
+                            Text(LocalizationHelper.futureReminders)
+                                .font(.customSize(14))
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 16)
+
+                            ForEach(futureReminders) { item in
                                 HStack(alignment: .center, spacing: 8) {
                                     VStack(alignment: .leading, spacing: 2) {
                                         // Date range split into two lines
@@ -284,7 +731,8 @@ struct RemindersView: View {
                             }
                         }
                     }
-                    .padding(.vertical, 8)
+                    .padding(.top, 12)
+                    .padding(.bottom, 12)
                 }
             }
         }
