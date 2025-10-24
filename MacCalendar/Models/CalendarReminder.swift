@@ -27,6 +27,12 @@ struct CalendarReminder: Identifiable, Hashable {
     let url: URL?
     /// 所属列表名称
     let listName: String
+    /// 是否是循环提醒
+    let isRecurring: Bool
+    /// 循环频率 (daily, weekly, monthly, yearly)
+    let recurrenceFrequency: String?
+    /// 循环间隔 (e.g., 1 for every month, 3 for every 3 months)
+    let recurrenceInterval: Int?
 
     /// 优先级显示文本
     var priorityText: String {

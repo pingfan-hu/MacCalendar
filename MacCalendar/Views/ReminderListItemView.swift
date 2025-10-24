@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ReminderListItemView: View {
     let reminder: CalendarReminder
+    var hideTime: Bool = false
 
     @State private var selectedReminderId: String? = nil
     @State private var isPopoverDismissing = false
@@ -34,29 +35,31 @@ struct ReminderListItemView: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                // Only show time if the reminder has a specific time
-                if reminder.hasTime, let dueDate = reminder.dueDate {
-                    Text(formatDueTime(dueDate))
-                        .font(.customSize(12))
-                } else if reminder.dueDate != nil {
-                    // Has date but no time - show "全天" (All Day)
-                    Text(LocalizationHelper.allDay)
-                        .font(.customSize(12))
-                } else {
-                    // No date at all
-                    Text(LocalizationHelper.noTime)
-                        .font(.customSize(12))
-                        .foregroundColor(.secondary)
-                }
+            if !hideTime {
+                VStack(alignment: .leading, spacing: 2) {
+                    // Only show time if the reminder has a specific time
+                    if reminder.hasTime, let dueDate = reminder.dueDate {
+                        Text(formatDueTime(dueDate))
+                            .font(.customSize(12))
+                    } else if reminder.dueDate != nil {
+                        // Has date but no time - show "全天" (All Day)
+                        Text(LocalizationHelper.allDay)
+                            .font(.customSize(12))
+                    } else {
+                        // No date at all
+                        Text(LocalizationHelper.noTime)
+                            .font(.customSize(12))
+                            .foregroundColor(.secondary)
+                    }
 
-                if !reminder.priorityText.isEmpty {
-                    Text(reminder.priorityText)
-                        .font(.customSize(10))
-                        .foregroundColor(.red)
+                    if !reminder.priorityText.isEmpty {
+                        Text(reminder.priorityText)
+                            .font(.customSize(10))
+                            .foregroundColor(.red)
+                    }
                 }
+                .frame(width: 62, alignment: .leading)
             }
-            .frame(width: 62, alignment: .leading)
 
             HStack(spacing: 0) {
                 // Colored bar on the left (matching event style)

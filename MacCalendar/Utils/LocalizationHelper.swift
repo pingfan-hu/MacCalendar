@@ -74,6 +74,26 @@ struct LocalizationHelper {
         isChinese ? "显示提醒事项" : "Show Reminders"
     }
 
+    static var noRemindersToShow: String {
+        isChinese ? "没有未完成的提醒事项" : "No incomplete reminders"
+    }
+
+    static var calendarTab: String {
+        isChinese ? "日历" : "Calendar"
+    }
+
+    static var remindersTab: String {
+        isChinese ? "提醒" : "Reminders"
+    }
+
+    static var oneTimeReminders: String {
+        isChinese ? "单次" : "One-time"
+    }
+
+    static var recurringReminders: String {
+        isChinese ? "循环" : "Recurring"
+    }
+
     // Settings strings
     static var appSettings: String {
         isChinese ? "应用设置" : "App Settings"
