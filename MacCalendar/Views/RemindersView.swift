@@ -44,8 +44,17 @@ struct RemindersView: View {
     }
 
     var recurringReminders: [ReminderWithDate] {
+        let today = Calendar.current.startOfDay(for: Date())
         return remindersWithDates
             .filter { $0.reminder.isRecurring }
+            .filter { item in
+                // Only show recurring reminders with due date today or earlier
+                guard let dueDate = item.reminder.dueDate else {
+                    return true // Show reminders without due date
+                }
+                let dueDateStart = Calendar.current.startOfDay(for: dueDate)
+                return dueDateStart <= today
+            }
             .sorted { r1, r2 in
                 if let d1 = r1.reminder.dueDate, let d2 = r2.reminder.dueDate {
                     return d1 < d2
