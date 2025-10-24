@@ -21,6 +21,56 @@ enum AppTab: String, CaseIterable {
     }
 }
 
+struct TabButton: View {
+    let tab: AppTab
+    let isSelected: Bool
+    let action: () -> Void
+
+    @State private var isHovering = false
+    @State private var isPressed = false
+
+    var body: some View {
+        Button(action: {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isPressed = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    isPressed = false
+                }
+            }
+            action()
+        }) {
+            Text(tab.localizedName)
+                .font(.customSize(15))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    Group {
+                        if isSelected {
+                            Color.blue.opacity(isPressed ? 0.25 : 0.15)
+                        } else if isPressed {
+                            Color.blue.opacity(0.1)
+                        } else if isHovering {
+                            Color.blue.opacity(0.08)
+                        } else {
+                            Color.clear
+                        }
+                    }
+                )
+                .foregroundColor(isSelected ? .blue : .primary)
+                .contentShape(Rectangle())
+                .scaleEffect(isPressed ? 0.97 : 1.0)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovering = hovering
+            }
+        }
+    }
+}
+
 struct ContentView: View {
     @StateObject private var calendarManager = CalendarManager()
     @AppStorage("weekStartDay") private var weekStartDay: WeekStartDay = SettingsManager.weekStartDay
@@ -32,20 +82,11 @@ struct ContentView: View {
             // Tab bar
             HStack(spacing: 0) {
                 ForEach(AppTab.allCases, id: \.self) { tab in
-                    Button(action: {
+                    TabButton(tab: tab, isSelected: selectedTab == tab) {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             selectedTab = tab
                         }
-                    }) {
-                        Text(tab.localizedName)
-                            .font(.customSize(15))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(selectedTab == tab ? Color.blue.opacity(0.15) : Color.clear)
-                            .foregroundColor(selectedTab == tab ? .blue : .primary)
-                            .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 16)

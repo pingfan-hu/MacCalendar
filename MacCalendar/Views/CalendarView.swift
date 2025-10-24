@@ -60,6 +60,8 @@ struct CalendarView: View {
                         calendarManager.goToNextMonth()
                     }
             }
+            .padding(.top, 12)
+            .padding(.bottom, 12)
             
             HStack {
                     ForEach(weekDays, id: \.self) { day in
