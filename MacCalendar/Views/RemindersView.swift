@@ -143,7 +143,7 @@ struct RemindersView: View {
                                 .padding(.leading, 16)
 
                             ForEach(oneTimeReminders) { item in
-                                HStack(alignment: .top, spacing: 8) {
+                                HStack(alignment: .center, spacing: 8) {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(formatDate(item.date))
                                             .font(.customSize(12))
@@ -176,7 +176,7 @@ struct RemindersView: View {
                                 .padding(.leading, 16)
 
                             ForEach(recurringReminders) { item in
-                                HStack(alignment: .top, spacing: 8) {
+                                HStack(alignment: .center, spacing: 8) {
                                     VStack(alignment: .leading, spacing: 2) {
                                         // Date range split into two lines
                                         let dateLines = getDateRangeLines(for: item)

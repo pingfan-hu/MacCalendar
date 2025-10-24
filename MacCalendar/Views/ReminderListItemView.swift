@@ -69,7 +69,7 @@ struct ReminderListItemView: View {
                     .foregroundStyle(reminder.color.opacity(0.6))
 
                 // Content area with checkmark circle and text
-                HStack(spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
                     // Checkmark circle indicator
                     ZStack {
                         Circle()
@@ -101,6 +101,7 @@ struct ReminderListItemView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.init(top: 6, leading: 6, bottom: 6, trailing: 6))
+                .frame(maxHeight: .infinity, alignment: .center)
                 .background(
                     LinearGradient(
                         gradient: Gradient(colors: [reminder.color.opacity(0.25), reminder.color.opacity(0.15)]),
@@ -109,6 +110,7 @@ struct ReminderListItemView: View {
                     )
                 )
             }
+            .frame(maxHeight: .infinity)
             .cornerRadius(6)
         }
         .padding([.top, .bottom], 3)

@@ -255,93 +255,35 @@ class CalendarManager: ObservableObject {
                     // 检查是否有截止日期
                     guard let dueDateComponents = ekReminder.dueDateComponents,
                           let dueDate = dueDateComponents.date else {
-                        // 没有截止日期的未完成提醒显示在今天
-                        if !ekReminder.isCompleted {
-                            allReminders.append(CalendarReminder(
-                                id: ekReminder.calendarItemIdentifier,
-                                title: ekReminder.title,
-                                isCompleted: ekReminder.isCompleted,
-                                priority: ekReminder.priority,
-                                dueDate: nil,
-                                hasTime: false,
-                                color: Color(nsColor: ekReminder.calendar.color),
-                                notes: ekReminder.notes,
-                                url: ekReminder.url,
-                                listName: ekReminder.calendar.title,
-                                isRecurring: false,
-                                recurrenceFrequency: nil,
-                                recurrenceInterval: nil
-                            ))
-                        }
+                        // 没有截止日期的提醒只在提醒面板显示，不在日历面板显示
                         continue
                     }
 
                     // 检查是否有时间组件（hour和minute不为nil表示有具体时间）
                     let hasTime = dueDateComponents.hour != nil && dueDateComponents.minute != nil
 
-                    // 处理重复规则
+                    // 跳过循环提醒 - 它们只在提醒面板显示，不在日历面板显示
                     if let recurrenceRules = ekReminder.recurrenceRules, !recurrenceRules.isEmpty {
-                        // 为每个重复规则生成重复日期
-                        for rule in recurrenceRules {
-                            let occurrences = self.generateRecurrenceOccurrences(
-                                startDate: dueDate,
-                                recurrenceRule: rule,
-                                rangeStart: startDate,
-                                rangeEnd: endDate
-                            )
+                        continue
+                    }
 
-                            // Get frequency and interval from rule
-                            let frequency: String
-                            switch rule.frequency {
-                            case .daily:
-                                frequency = "daily"
-                            case .weekly:
-                                frequency = "weekly"
-                            case .monthly:
-                                frequency = "monthly"
-                            case .yearly:
-                                frequency = "yearly"
-                            @unknown default:
-                                frequency = "unknown"
-                            }
-
-                            for occurrence in occurrences {
-                                allReminders.append(CalendarReminder(
-                                    id: "\(ekReminder.calendarItemIdentifier)_\(occurrence.timeIntervalSince1970)",
-                                    title: ekReminder.title,
-                                    isCompleted: ekReminder.isCompleted,
-                                    priority: ekReminder.priority,
-                                    dueDate: occurrence,
-                                    hasTime: hasTime,
-                                    color: Color(nsColor: ekReminder.calendar.color),
-                                    notes: ekReminder.notes,
-                                    url: ekReminder.url,
-                                    listName: ekReminder.calendar.title,
-                                    isRecurring: true,
-                                    recurrenceFrequency: frequency,
-                                    recurrenceInterval: rule.interval
-                                ))
-                            }
-                        }
-                    } else {
-                        // 非重复提醒，检查是否在范围内
-                        if dueDate >= startDate && dueDate <= endDate {
-                            allReminders.append(CalendarReminder(
-                                id: ekReminder.calendarItemIdentifier,
-                                title: ekReminder.title,
-                                isCompleted: ekReminder.isCompleted,
-                                priority: ekReminder.priority,
-                                dueDate: dueDate,
-                                hasTime: hasTime,
-                                color: Color(nsColor: ekReminder.calendar.color),
-                                notes: ekReminder.notes,
-                                url: ekReminder.url,
-                                listName: ekReminder.calendar.title,
-                                isRecurring: false,
-                                recurrenceFrequency: nil,
-                                recurrenceInterval: nil
-                            ))
-                        }
+                    // 非重复提醒，检查是否在范围内
+                    if dueDate >= startDate && dueDate <= endDate {
+                        allReminders.append(CalendarReminder(
+                            id: ekReminder.calendarItemIdentifier,
+                            title: ekReminder.title,
+                            isCompleted: ekReminder.isCompleted,
+                            priority: ekReminder.priority,
+                            dueDate: dueDate,
+                            hasTime: hasTime,
+                            color: Color(nsColor: ekReminder.calendar.color),
+                            notes: ekReminder.notes,
+                            url: ekReminder.url,
+                            listName: ekReminder.calendar.title,
+                            isRecurring: false,
+                            recurrenceFrequency: nil,
+                            recurrenceInterval: nil
+                        ))
                     }
                 }
 
