@@ -148,6 +148,7 @@ struct ContentView: View {
                 }
             }
         }
+        .background(Color(NSColor.windowBackgroundColor).opacity(0.3))
         .onChange(of: weekStartDay) { oldValue, newValue in
             calendarManager.refreshEvents()
         }

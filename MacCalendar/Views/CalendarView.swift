@@ -140,20 +140,21 @@ struct CalendarView: View {
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
                                     .frame(height: 14)
 
+                                // Always reserve fixed height for alternative calendar text to keep dot position consistent
                                 Text(getAlternativeCalendarText(for: day))
                                     .font(.customSize(8))
                                     .foregroundColor(isToday ? .white : (isCurrentMonth ? .primary : .gray.opacity(0.5)))
                                     .frame(height: 10)
+                                    .opacity(getAlternativeCalendarText(for: day).isEmpty ? 0 : 1)
                             }
                             .frame(height:44)
                         if !day.events.isEmpty || !day.reminders.isEmpty {
-                            let hasAlternativeText = !getAlternativeCalendarText(for: day).isEmpty
                             // Use first event color if available, otherwise use first reminder color
                             let dotColor = !day.events.isEmpty ? day.events.first!.color : day.reminders.first!.color
                             Circle()
                                 .fill(dotColor)
                                 .frame(width: 6, height: 6)
-                                .offset(y: hasAlternativeText ? 19 : 14)
+                                .offset(y: 15)
                         }
                     }
                     .frame(width: 44, height: 44)
