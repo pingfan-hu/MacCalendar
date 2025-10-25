@@ -30,22 +30,7 @@ class CalendarIcon: ObservableObject {
     }
 
     private func updateDisplayOutput() {
-        dateFormatter.locale = Locale.current
-        
-        switch SettingsManager.displayMode {
-        case .icon:
-            displayOutput = Self.iconModeIdentifier
-        case .date:
-            dateFormatter.dateStyle = .medium
-            dateFormatter.timeStyle = .none
-            displayOutput = dateFormatter.string(from: Date())
-        case .time:
-            dateFormatter.dateStyle = .none
-            dateFormatter.timeStyle = .medium
-            displayOutput = dateFormatter.string(from: Date())
-        case .custom:
-            dateFormatter.dateFormat = SettingsManager.customFormatString
-            displayOutput = dateFormatter.string(from: Date())
-        }
+        // Always display icon mode
+        displayOutput = Self.iconModeIdentifier
     }
 }

@@ -11,23 +11,11 @@ import SwiftUI
 
 enum DisplayMode: String, CaseIterable, Identifiable {
     case icon
-    case date
-    case time
-    case custom
 
     var id: Self { self }
 
     var localizedName: String {
-        switch self {
-        case .icon:
-            return LocalizationHelper.displayModeIcon
-        case .date:
-            return LocalizationHelper.displayModeDate
-        case .time:
-            return LocalizationHelper.displayModeTime
-        case .custom:
-            return LocalizationHelper.displayModeCustom
-        }
+        return LocalizationHelper.displayModeIcon
     }
 }
 
@@ -96,12 +84,32 @@ enum WeekStartDay: String, CaseIterable, Identifiable {
     }
 }
 
+enum AppearanceMode: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    var id: Self { self }
+
+    var localizedName: String {
+        switch self {
+        case .system:
+            return LocalizationHelper.appearanceSystem
+        case .light:
+            return LocalizationHelper.appearanceLight
+        case .dark:
+            return LocalizationHelper.appearanceDark
+        }
+    }
+}
+
 struct SettingsManager {
     @AppStorage("displayMode") static var displayMode: DisplayMode = .icon
     @AppStorage("customFormatString") static var customFormatString: String = "yyyy-MM-dd"
     @AppStorage("weekStartDay") static var weekStartDay: WeekStartDay = .system
     @AppStorage("alternativeCalendar") static var alternativeCalendar: AlternativeCalendarType = .none
     @AppStorage("appLanguage") static var appLanguage: AppLanguage = .system
+    @AppStorage("appearanceMode") static var appearanceMode: AppearanceMode = .system
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("isPopoverPinned") static var isPopoverPinned: Bool = false
 }

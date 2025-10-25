@@ -24,6 +24,9 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
         // Register bundled custom font
         registerCustomFont()
 
+        // Apply appearance mode
+        applyAppearanceMode()
+
         // Initialize shared CalendarManager once
         Task { @MainActor in
             calendarManager = CalendarManager()
@@ -62,11 +65,11 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
                     .store(in: &cancellables)
 
         popover = NSPopover()
-        popover.appearance = NSAppearance(named: .aqua)
         updatePopoverBehavior()
 
         NotificationCenter.default.addObserver(self, selector: #selector(closePopoverIfNotPinned), name: NSApplication.didResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handlePinStateChanged), name: NSNotification.Name("PopoverPinStateChanged"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleAppearanceModeChanged), name: NSNotification.Name("AppearanceModeChanged"), object: nil)
     }
 
     deinit {
@@ -143,6 +146,14 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
         updatePopoverBehavior()
     }
 
+    @objc func handleAppearanceModeChanged() {
+        applyAppearanceMode()
+        // Force popover to update appearance if it's currently shown
+        if popover.isShown, let window = popover.contentViewController?.view.window {
+            window.appearance = NSApp.appearance
+        }
+    }
+
     private func updatePopoverBehavior() {
         if SettingsManager.isPopoverPinned {
             popover.behavior = .semitransient
@@ -186,6 +197,19 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
             if let error = error?.takeRetainedValue() {
                 print("❌ Failed to register custom font: \(error)")
             }
+        }
+    }
+
+    private func applyAppearanceMode() {
+        let appearanceMode = SettingsManager.appearanceMode
+
+        switch appearanceMode {
+        case .system:
+            NSApp.appearance = nil
+        case .light:
+            NSApp.appearance = NSAppearance(named: .aqua)
+        case .dark:
+            NSApp.appearance = NSAppearance(named: .darkAqua)
         }
     }
 }

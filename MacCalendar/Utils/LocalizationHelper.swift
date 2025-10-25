@@ -253,4 +253,21 @@ struct LocalizationHelper {
     static var weekStartMonday: String {
         isChinese ? "星期一" : "Monday"
     }
+
+    // Appearance mode strings
+    static var appearance: String {
+        isChinese ? "外观" : "Appearance"
+    }
+
+    static var appearanceSystem: String {
+        isChinese ? "跟随系统" : "Follow System"
+    }
+
+    static var appearanceLight: String {
+        isChinese ? "浅色" : "Light"
+    }
+
+    static var appearanceDark: String {
+        isChinese ? "深色" : "Dark"
+    }
 }
