@@ -17,10 +17,17 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
 
     private var calendarIcon = CalendarIcon()
     private var cancellables = Set<AnyCancellable>()
+    private var keyboardEventMonitor: Any?
+    private var calendarManager: CalendarManager?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Register bundled custom font
         registerCustomFont()
+
+        // Initialize shared CalendarManager once
+        Task { @MainActor in
+            calendarManager = CalendarManager()
+        }
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
@@ -30,7 +37,7 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
             button.target = self
         }
 
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+        keyboardEventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             if event.modifierFlags.contains(.command) && event.characters == "," {
                 self?.showSettingsWindow()
                 return nil
@@ -62,6 +69,17 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(handlePinStateChanged), name: NSNotification.Name("PopoverPinStateChanged"), object: nil)
     }
 
+    deinit {
+        // Clean up event monitor
+        if let monitor = keyboardEventMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
+        // Clean up notification observers
+        NotificationCenter.default.removeObserver(self)
+        // Clean up Combine subscriptions
+        cancellables.removeAll()
+    }
+
     @objc func statusItemClicked(sender: NSStatusBarButton) {
         guard let event = NSApp.currentEvent else { return }
 
@@ -85,15 +103,30 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
                 popover.performClose(nil)
             } else {
                 updatePopoverBehavior()
-                let hostingController = NSHostingController(rootView: ContentView())
-                hostingController.sizingOptions = .intrinsicContentSize
-                popover.contentViewController = hostingController
 
-                NSApp.activate(ignoringOtherApps: true)
-                popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-                popover.contentViewController?.view.window?.makeKey()
+                // Ensure CalendarManager is initialized before showing popover
+                if calendarManager == nil {
+                    Task { @MainActor in
+                        calendarManager = CalendarManager()
+                        showPopoverContent(button: button)
+                    }
+                } else {
+                    showPopoverContent(button: button)
+                }
             }
         }
+    }
+
+    private func showPopoverContent(button: NSStatusBarButton) {
+        guard let manager = calendarManager else { return }
+
+        let hostingController = NSHostingController(rootView: ContentView(calendarManager: manager))
+        hostingController.sizingOptions = .intrinsicContentSize
+        popover.contentViewController = hostingController
+
+        NSApp.activate(ignoringOtherApps: true)
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        popover.contentViewController?.view.window?.makeKey()
     }
 
     @objc func closePopover() {

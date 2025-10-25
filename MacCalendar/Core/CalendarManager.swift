@@ -39,7 +39,13 @@ class CalendarManager: ObservableObject {
         // 订阅日历数据库变化的通知
         subscribeToCalendarChanges()
     }
-    
+
+    deinit {
+        // Clean up all Combine subscriptions
+        cancellables.removeAll()
+        print("CalendarManager deallocated")
+    }
+
     func goToCurrentMonth(){
         currentMonth = Date()
         Task { await loadMonth(date: currentMonth) }

@@ -23,6 +23,12 @@ class CalendarIcon: ObservableObject {
         }
     }
 
+    deinit {
+        timer?.invalidate()
+        timer = nil
+        print("CalendarIcon deallocated")
+    }
+
     private func updateDisplayOutput() {
         dateFormatter.locale = Locale.current
         

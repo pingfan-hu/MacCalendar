@@ -76,7 +76,7 @@ struct TabButton: View {
 }
 
 struct ContentView: View {
-    @StateObject private var calendarManager = CalendarManager()
+    @ObservedObject var calendarManager: CalendarManager
     @AppStorage("weekStartDay") private var weekStartDay: WeekStartDay = SettingsManager.weekStartDay
     @AppStorage("isPopoverPinned") private var isPopoverPinned: Bool = SettingsManager.isPopoverPinned
     @State private var selectedTab: AppTab = .calendar
