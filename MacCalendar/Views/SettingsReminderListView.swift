@@ -9,7 +9,7 @@ import SwiftUI
 import EventKit
 
 struct SettingsReminderListView: View {
-    @StateObject private var calendarManager = CalendarManager()
+    @ObservedObject var calendarManager: CalendarManager
     @State private var reminderLists: [EKCalendar] = []
     @State private var listVisibility: [String: Bool] = [:]
 

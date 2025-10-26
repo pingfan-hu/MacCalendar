@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SettingsIconView: View {
+    @ObservedObject var calendarManager: CalendarManager
     @AppStorage("weekStartDay") private var weekStartDay: WeekStartDay = SettingsManager.weekStartDay
     @AppStorage("alternativeCalendar") private var alternativeCalendar: AlternativeCalendarType = SettingsManager.alternativeCalendar
     @AppStorage("appLanguage") private var appLanguage: AppLanguage = SettingsManager.appLanguage
@@ -33,6 +34,9 @@ struct SettingsIconView: View {
                         }
                     }
                     .id(appLanguage)
+                    .onChange(of: weekStartDay) { oldValue, newValue in
+                        calendarManager.refreshEvents()
+                    }
                 }
 
                 HStack {
@@ -46,6 +50,9 @@ struct SettingsIconView: View {
                         }
                     }
                     .id(appLanguage)
+                    .onChange(of: alternativeCalendar) { oldValue, newValue in
+                        calendarManager.refreshEvents()
+                    }
                 }
 
                 HStack {
@@ -75,6 +82,9 @@ struct SettingsIconView: View {
                         }
                     }
                     .id(appLanguage)
+                    .onChange(of: appLanguage) { oldValue, newValue in
+                        calendarManager.refreshEvents()
+                    }
                 }
 
                 Toggle(isOn: $launchAtLogin) {
@@ -109,5 +119,5 @@ struct SettingsIconView: View {
 }
 
 #Preview {
-    SettingsIconView()
+    SettingsIconView(calendarManager: CalendarManager())
 }

@@ -229,7 +229,7 @@ struct LocalizationHelper {
     }
 
     static var alternativeCalendarChinese: String {
-        isChinese ? "简体中文（农历）" : "Chinese Simplified (Lunar)"
+        isChinese ? "农历（简中）" : "Lunar (Simplified Chinese)"
     }
 
     // Language settings

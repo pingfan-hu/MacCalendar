@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @ObservedObject var calendarManager: CalendarManager
     @State private var selection:SettingsType? = .basicSettings
     @AppStorage("appLanguage") private var appLanguage: AppLanguage = SettingsManager.appLanguage
 
@@ -43,9 +44,20 @@ struct SettingsView: View {
             .id(appLanguage)
             
             Divider()
-            
+
             ZStack {
-                selection?.view
+                if let selection = selection {
+                    switch selection {
+                    case .basicSettings:
+                        SettingsIconView(calendarManager: calendarManager)
+                    case .calendars:
+                        SettingsCalendarView(calendarManager: calendarManager)
+                    case .reminderLists:
+                        SettingsReminderListView(calendarManager: calendarManager)
+                    case .about:
+                        SettingsAboutView()
+                    }
+                }
             }
             .padding(.horizontal)
             .padding(.top, 16)

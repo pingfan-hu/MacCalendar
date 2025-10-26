@@ -9,7 +9,7 @@ import SwiftUI
 import EventKit
 
 struct SettingsCalendarView: View {
-    @StateObject private var calendarManager = CalendarManager()
+    @ObservedObject var calendarManager: CalendarManager
     @State private var calendars: [EKCalendar] = []
     @State private var calendarVisibility: [String: Bool] = [:]
 

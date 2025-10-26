@@ -232,17 +232,53 @@ struct RemindersView: View {
     }
 
     func formatDate(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        let dateYear = calendar.component(.year, from: date)
+        let includesYear = currentYear != dateYear
+
         let formatter = DateFormatter()
         let isChinese = SettingsManager.appLanguage == .chinese ||
                        (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
 
         if isChinese {
-            formatter.dateFormat = "MM月dd日"
+            if includesYear {
+                // Format: "26年6月1日" (remove leading zeros)
+                let year = dateYear % 100 // Get last 2 digits
+                let month = calendar.component(.month, from: date)
+                let day = calendar.component(.day, from: date)
+                return "\(year)年\(month)月\(day)日"
+            } else {
+                // Format: "6月1日" (remove leading zeros)
+                let month = calendar.component(.month, from: date)
+                let day = calendar.component(.day, from: date)
+                return "\(month)月\(day)日"
+            }
         } else {
-            formatter.dateFormat = "MMM d"
             formatter.locale = Locale(identifier: "en_US")
+            if includesYear {
+                // Format: "Jun 1, 26"
+                formatter.dateFormat = "MMM d, yy"
+            } else {
+                // Format: "Jun 1"
+                formatter.dateFormat = "MMM d"
+            }
+            return formatter.string(from: date)
         }
-        return formatter.string(from: date)
+    }
+
+    // Helper function to determine if date string includes year
+    func dateStringIncludesYear(_ dateString: String) -> Bool {
+        let isChinese = SettingsManager.appLanguage == .chinese ||
+                       (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+
+        if isChinese {
+            // Chinese year format contains "年" character
+            return dateString.contains("年")
+        } else {
+            // English year format contains comma
+            return dateString.contains(",")
+        }
     }
 
     func formatTime(_ date: Date?) -> String {
@@ -328,13 +364,14 @@ struct RemindersView: View {
                                             let dateLines = getDateRangeLines(for: item)
                                             ForEach(0..<dateLines.count, id: \.self) { index in
                                                 Text(dateLines[index])
-                                                    .font(.customSize(12))
+                                                    .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                     .foregroundColor(.secondary)
                                             }
                                         } else {
                                             // Single date for one-time
-                                            Text(formatDate(item.date))
-                                                .font(.customSize(12))
+                                            let dateText = formatDate(item.date)
+                                            Text(dateText)
+                                                .font(.customSize(dateStringIncludesYear(dateText) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -372,8 +409,9 @@ struct RemindersView: View {
                             ForEach(oneTimeReminders) { item in
                                 HStack(alignment: .center, spacing: 8) {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(formatDate(item.date))
-                                            .font(.customSize(12))
+                                        let dateText = formatDate(item.date)
+                                        Text(dateText)
+                                            .font(.customSize(dateStringIncludesYear(dateText) ? 10 : 12))
                                             .foregroundColor(.secondary)
 
                                         if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
@@ -414,7 +452,7 @@ struct RemindersView: View {
                                         let dateLines = getDateRangeLines(for: item)
                                         ForEach(0..<dateLines.count, id: \.self) { index in
                                             Text(dateLines[index])
-                                                .font(.customSize(12))
+                                                .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -456,7 +494,7 @@ struct RemindersView: View {
                                         let dateLines = getDateRangeLines(for: item)
                                         ForEach(0..<dateLines.count, id: \.self) { index in
                                             Text(dateLines[index])
-                                                .font(.customSize(12))
+                                                .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -498,7 +536,7 @@ struct RemindersView: View {
                                         let dateLines = getDateRangeLines(for: item)
                                         ForEach(0..<dateLines.count, id: \.self) { index in
                                             Text(dateLines[index])
-                                                .font(.customSize(12))
+                                                .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -540,7 +578,7 @@ struct RemindersView: View {
                                         let dateLines = getDateRangeLines(for: item)
                                         ForEach(0..<dateLines.count, id: \.self) { index in
                                             Text(dateLines[index])
-                                                .font(.customSize(12))
+                                                .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -582,7 +620,7 @@ struct RemindersView: View {
                                         let dateLines = getDateRangeLines(for: item)
                                         ForEach(0..<dateLines.count, id: \.self) { index in
                                             Text(dateLines[index])
-                                                .font(.customSize(12))
+                                                .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -624,7 +662,7 @@ struct RemindersView: View {
                                         let dateLines = getDateRangeLines(for: item)
                                         ForEach(0..<dateLines.count, id: \.self) { index in
                                             Text(dateLines[index])
-                                                .font(.customSize(12))
+                                                .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -666,7 +704,7 @@ struct RemindersView: View {
                                         let dateLines = getDateRangeLines(for: item)
                                         ForEach(0..<dateLines.count, id: \.self) { index in
                                             Text(dateLines[index])
-                                                .font(.customSize(12))
+                                                .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -708,7 +746,7 @@ struct RemindersView: View {
                                         let dateLines = getDateRangeLines(for: item)
                                         ForEach(0..<dateLines.count, id: \.self) { index in
                                             Text(dateLines[index])
-                                                .font(.customSize(12))
+                                                .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                 .foregroundColor(.secondary)
                                         }
 

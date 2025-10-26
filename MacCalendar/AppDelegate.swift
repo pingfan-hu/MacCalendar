@@ -163,8 +163,10 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
     }
     
     @objc func showSettingsWindow() {
+        guard let calendarManager = calendarManager else { return }
+
         if settingsWindow == nil {
-            let settingsView = SettingsView()
+            let settingsView = SettingsView(calendarManager: calendarManager)
 
             let window = NSWindow(
                 contentRect: NSRect(x: 0, y: 0, width: 525, height: 375),

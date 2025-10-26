@@ -19,6 +19,10 @@ struct CalendarView: View {
     }
 
     @State private var hoveredDate: Date?
+    @State private var isHoveringLeftArrow = false
+    @State private var isHoveringRightArrow = false
+    @State private var isPressedLeftArrow = false
+    @State private var isPressedRightArrow = false
 
     var weekDays: [String] {
         var calendar = Calendar.current
@@ -40,23 +44,81 @@ struct CalendarView: View {
     var body: some View {
         VStack(spacing:0) {
             HStack{
-                Image(systemName: "chevron.compact.backward")
-                    .frame(width:80,alignment: .leading)
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 14, weight: .semibold))
+                    .frame(width:30,alignment: .leading)
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background(
+                        Group {
+                            if isPressedLeftArrow {
+                                Color.blue.opacity(0.15)
+                            } else if isHoveringLeftArrow {
+                                Color.blue.opacity(0.08)
+                            } else {
+                                Color.clear
+                            }
+                        }
+                    )
+                    .cornerRadius(6)
                     .contentShape(Rectangle())
+                    .scaleEffect(isPressedLeftArrow ? 0.95 : 1.0)
+                    .onHover { hovering in
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            isHoveringLeftArrow = hovering
+                        }
+                    }
                     .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.1)) {
+                            isPressedLeftArrow = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation(.easeInOut(duration: 0.1)) {
+                                isPressedLeftArrow = false
+                            }
+                        }
                         calendarManager.goToPreviousMonth()
                     }
                 Spacer()
                 Text(ConvertTitle(date: calendarManager.currentMonth))
-                    .font(.customSize(16))
+                    .font(.customSize(15))
                     .onTapGesture {
                         calendarManager.goToCurrentMonth()
                     }
                 Spacer()
-                Image(systemName: "chevron.compact.forward")
-                    .frame(width:80,alignment: .trailing)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .frame(width:30,alignment: .trailing)
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8)
+                    .background(
+                        Group {
+                            if isPressedRightArrow {
+                                Color.blue.opacity(0.15)
+                            } else if isHoveringRightArrow {
+                                Color.blue.opacity(0.08)
+                            } else {
+                                Color.clear
+                            }
+                        }
+                    )
+                    .cornerRadius(6)
                     .contentShape(Rectangle())
+                    .scaleEffect(isPressedRightArrow ? 0.95 : 1.0)
+                    .onHover { hovering in
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            isHoveringRightArrow = hovering
+                        }
+                    }
                     .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.1)) {
+                            isPressedRightArrow = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation(.easeInOut(duration: 0.1)) {
+                                isPressedRightArrow = false
+                            }
+                        }
                         calendarManager.goToNextMonth()
                     }
             }
@@ -177,9 +239,9 @@ struct CalendarView: View {
                            (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
 
             if isChinese {
-                formatter.dateFormat = "yyyy年MM月"
+                formatter.dateFormat = "yyyy年M月"
             } else {
-                formatter.dateFormat = "MMMM yyyy"
+                formatter.dateFormat = "MMM yyyy"
                 formatter.locale = Locale(identifier: "en_US")
             }
             return formatter.string(from: date)

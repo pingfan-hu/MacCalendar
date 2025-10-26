@@ -27,18 +27,4 @@ enum SettingsType: String, CaseIterable, Identifiable {
             return LocalizationHelper.about
         }
     }
-
-    @ViewBuilder
-    var view: some View {
-        switch self {
-        case .basicSettings:
-            SettingsIconView()
-        case .calendars:
-            SettingsCalendarView()
-        case .reminderLists:
-            SettingsReminderListView()
-        case .about:
-            SettingsAboutView()
-        }
-    }
 }
