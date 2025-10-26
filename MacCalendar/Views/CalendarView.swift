@@ -68,17 +68,22 @@ struct CalendarView: View {
                             isHoveringLeftArrow = hovering
                         }
                     }
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            isPressedLeftArrow = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            withAnimation(.easeInOut(duration: 0.1)) {
-                                isPressedLeftArrow = false
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                if !isPressedLeftArrow {
+                                    withAnimation(.easeInOut(duration: 0.1)) {
+                                        isPressedLeftArrow = true
+                                    }
+                                }
                             }
-                        }
-                        calendarManager.goToPreviousMonth()
-                    }
+                            .onEnded { _ in
+                                withAnimation(.easeInOut(duration: 0.1)) {
+                                    isPressedLeftArrow = false
+                                }
+                                calendarManager.goToPreviousMonth()
+                            }
+                    )
                 Spacer()
                 Text(ConvertTitle(date: calendarManager.currentMonth))
                     .font(.customSize(15))
@@ -110,17 +115,22 @@ struct CalendarView: View {
                             isHoveringRightArrow = hovering
                         }
                     }
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            isPressedRightArrow = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            withAnimation(.easeInOut(duration: 0.1)) {
-                                isPressedRightArrow = false
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                if !isPressedRightArrow {
+                                    withAnimation(.easeInOut(duration: 0.1)) {
+                                        isPressedRightArrow = true
+                                    }
+                                }
                             }
-                        }
-                        calendarManager.goToNextMonth()
-                    }
+                            .onEnded { _ in
+                                withAnimation(.easeInOut(duration: 0.1)) {
+                                    isPressedRightArrow = false
+                                }
+                                calendarManager.goToNextMonth()
+                            }
+                    )
             }
             .padding(.top, 12)
             .padding(.bottom, 12)

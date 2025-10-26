@@ -48,7 +48,11 @@ class CalendarManager: ObservableObject {
 
     func goToCurrentMonth(){
         currentMonth = Date()
-        Task { await loadMonth(date: currentMonth) }
+        Task {
+            await loadMonth(date: currentMonth)
+            // Also select today's date after loading the month
+            getEvent(date: Date())
+        }
     }
     
     func goToNextMonth() {

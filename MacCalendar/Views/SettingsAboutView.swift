@@ -9,6 +9,8 @@ import SwiftUI
 
 struct SettingsAboutView: View {
     @State private var isHoveringGitHub = false
+    @State private var isHoveringName = false
+    @State private var isPressedName = false
 
     var body: some View {
         VStack(alignment:.center,spacing: 12){
@@ -17,9 +19,42 @@ struct SettingsAboutView: View {
             Text(LocalizationHelper.appDescription)
                 .font(.customSize(14))
                 .foregroundStyle(.secondary)
-            Text(LocalizationHelper.appCredit)
-                .font(.customCaption)
-                .foregroundStyle(.secondary)
+            HStack(spacing: 0) {
+                Text("Original version from bylinxx, forked by ")
+                    .font(.customCaption)
+                    .foregroundStyle(.secondary)
+                Text("Pingfan Hu")
+                    .font(.customCaption)
+                    .fontWeight(.bold)
+                    .foregroundStyle(isHoveringName ? .blue : .primary)
+                    .scaleEffect(isPressedName ? 0.95 : 1.0)
+                    .animation(.easeInOut(duration: 0.15), value: isHoveringName)
+                    .animation(.easeInOut(duration: 0.1), value: isPressedName)
+                    .onHover { hovering in
+                        isHoveringName = hovering
+                        if hovering {
+                            NSCursor.pointingHand.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.1)) {
+                            isPressedName = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation(.easeInOut(duration: 0.1)) {
+                                isPressedName = false
+                            }
+                        }
+                        if let url = URL(string: "https://pingfanhu.com") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
+                Text(".")
+                    .font(.customCaption)
+                    .foregroundStyle(.secondary)
+            }
             HStack{
                 Text(LocalizationHelper.version)
                 Text(Bundle.main.appVersion ?? "")

@@ -189,12 +189,12 @@ struct LocalizationHelper {
     }
 
     static var appDescription: String {
-        isChinese ? "完全免费且开源的macOS小而美菜单栏日历"
-                  : "A free and open-source mini menu bar calendar for macOS"
+        isChinese ? "免费且开源的macOS菜单栏日历。"
+                  : "A free and open-source mini menu bar calendar for macOS."
     }
 
     static var appCredit: String {
-        "Original version from bylinxx, forked by Pingfan Hu"
+        "Original version from bylinxx, forked by Pingfan Hu."
     }
 
     // Menu strings
