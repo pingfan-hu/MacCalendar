@@ -4,29 +4,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MacCalendar is a free and open-source macOS menu bar calendar application built with SwiftUI. It displays in the menu bar only (no main window), supports Chinese lunar calendar, 24 solar terms, and integrates with macOS Calendar events.
+MiniCalendar is a free and open-source macOS menu bar calendar application built with SwiftUI. It displays in the menu bar only (no main window), supports Chinese lunar calendar, 24 solar terms, and integrates with macOS Calendar events.
 
 ## Build & Run
 
 This is an Xcode project. Build and run using:
 ```bash
 # Debug build
-xcodebuild -project MacCalendar.xcodeproj -scheme MacCalendar build
+xcodebuild -project MiniCalendar.xcodeproj -scheme MiniCalendar build
 
 # Release build with clean (for distribution)
-xcodebuild -project MacCalendar.xcodeproj -scheme MacCalendar -configuration Release clean build
+xcodebuild -project MiniCalendar.xcodeproj -scheme MiniCalendar -configuration Release clean build
 ```
 
-Or open `MacCalendar.xcodeproj` in Xcode and press Cmd+R.
+Or open `MiniCalendar.xcodeproj` in Xcode and press Cmd+R.
 
-Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MacCalendar-*/Build/Products/Release/MacCalendar.app`
+Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MiniCalendar-*/Build/Products/Release/MiniCalendar.app`
 
 **Release Process**: See `RELEASE.md` for complete instructions on building, signing, notarizing, and publishing releases to GitHub.
 
 ## Architecture
 
 ### Entry Point & App Structure
-- **MacCalendarApp.swift**: App entry point with minimal Scene definition
+- **MiniCalendarApp.swift**: App entry point with minimal Scene definition
 - **AppDelegate.swift**: Main application logic managing the menu bar status item, popover display, and settings window
   - Status bar item responds to both left-click (show calendar) and right-click (show menu with Settings/Quit)
   - Popover contains the main ContentView with calendar and event list
@@ -47,7 +47,9 @@ Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MacCa
 **SettingsManager** (`Core/SettingsManager.swift`):
 - Uses `@AppStorage` for persistent settings
 - `DisplayMode` enum: icon/date/time/custom formats for menu bar display
-- Controls launch-at-login behavior
+- `AppearanceMode` enum: system/light/dark appearance modes
+- `WeekStartDay` enum: configurable week start (system/sunday/monday)
+- Controls launch-at-login behavior and popover pinning state
 
 **Calendar Customizations**:
 - Custom Calendar extension in `Utils/Extensions.swift` provides `Calendar.mondayBased`
@@ -112,21 +114,24 @@ Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MacCa
 
 ### Menu Bar & UI
 - Menu bar status item updates reactively via Combine publishers (1-second timer)
-- Popover behavior is `.transient` (auto-dismisses when losing focus)
+- Popover behavior is configurable: `.transient` (auto-dismiss) or `.semitransient` (pinned mode via `SettingsManager.isPopoverPinned`)
 - Settings window opens with Cmd+, keyboard shortcut
 - Right-click menu shows Settings and Quit options
+- Appearance mode (light/dark/system) can be configured via Settings and is applied app-wide
 
 ### Custom Font
-- Bundled custom font: "TsangerJinKai02-W04" (tsangerjinkai02w4.ttf)
+- Bundled custom font: "LXGWWenKai-Medium" (LXGWWenKai-Medium.ttf)
 - Registered programmatically in `AppDelegate.registerCustomFont()` using `CTFontManagerRegisterFontsForURL`
 - Requires `ATSApplicationFontsPath` set to "." in Info.plist
 - Font extensions in `Extensions.swift` provide semantic sizes with automatic fallback to system font
 
 ### Permissions & Entitlements
-- **Critical**: App must be signed with entitlements file (`MacCalendar.entitlements`) for calendar and reminders access
+- **Critical**: App must be signed with entitlements file (`MiniCalendar.entitlements`) for calendar and reminders access
 - Required entitlements:
+  - `com.apple.security.app-sandbox = false` (app is not sandboxed)
   - `com.apple.security.personal-information.calendars = true`
-  - `com.apple.security.personal-information.reminders = true` (if accessing reminders)
+  - `com.apple.security.personal-information.reminders = true`
 - Info.plist requires:
   - `NSCalendarsUsageDescription` and `NSCalendarsFullAccessUsageDescription` for calendar access
   - `NSRemindersUsageDescription` and `NSRemindersFullAccessUsageDescription` for reminders access
+  - `ATSApplicationFontsPath = "."` for custom font support
