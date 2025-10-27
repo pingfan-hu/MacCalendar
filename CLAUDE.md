@@ -135,3 +135,4 @@ Build output location: `/Users/pingfan/Library/Developer/Xcode/DerivedData/MiniC
   - `NSCalendarsUsageDescription` and `NSCalendarsFullAccessUsageDescription` for calendar access
   - `NSRemindersUsageDescription` and `NSRemindersFullAccessUsageDescription` for reminders access
   - `ATSApplicationFontsPath = "."` for custom font support
+- **LaunchAtLoginManager** (`Core/LaunchAtLoginManager.swift`) handles login item registration using `SMAppService` (macOS 13+)

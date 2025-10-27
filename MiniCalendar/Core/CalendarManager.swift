@@ -47,11 +47,23 @@ class CalendarManager: ObservableObject {
     }
 
     func goToCurrentMonth(){
-        currentMonth = Date()
+        let today = Date()
+
+        // Optimization: Only reload if we're not already at today
+        // Check if we're viewing the current month AND today is already selected
+        let isViewingCurrentMonth = calendar.isDate(currentMonth, equalTo: today, toGranularity: .month)
+        let isTodaySelected = calendar.isDate(selectedDay, inSameDayAs: today)
+
+        // Skip reload if already at today
+        guard !isViewingCurrentMonth || !isTodaySelected else {
+            return
+        }
+
+        currentMonth = today
         Task {
             await loadMonth(date: currentMonth)
             // Also select today's date after loading the month
-            getEvent(date: Date())
+            getEvent(date: today)
         }
     }
     
@@ -315,9 +327,6 @@ class CalendarManager: ObservableObject {
                 var allReminders: [CalendarReminder] = []
 
                 for ekReminder in ekReminders {
-                    // 只处理未完成的提醒
-                    guard !ekReminder.isCompleted else { continue }
-
                     // 检查是否有截止日期
                     guard let dueDateComponents = ekReminder.dueDateComponents,
                           let dueDate = dueDateComponents.date else {

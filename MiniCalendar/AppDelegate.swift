@@ -114,6 +114,10 @@ class AppDelegate: NSObject,NSApplicationDelegate, NSWindowDelegate {
                         showPopoverContent(button: button)
                     }
                 } else {
+                    // Reset calendar to today when opening popover
+                    Task { @MainActor in
+                        calendarManager?.goToCurrentMonth()
+                    }
                     showPopoverContent(button: button)
                 }
             }
