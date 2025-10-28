@@ -10,7 +10,7 @@ import SwiftUI
 struct ReminderWithDate: Identifiable {
     let id: String
     let reminder: CalendarReminder
-    let date: Date
+    let date: Date?
 }
 
 struct RemindersView: View {
@@ -24,7 +24,7 @@ struct RemindersView: View {
             ReminderWithDate(
                 id: reminder.id,
                 reminder: reminder,
-                date: reminder.dueDate ?? Date()
+                date: reminder.dueDate
             )
         }
     }
@@ -43,11 +43,17 @@ struct RemindersView: View {
                 return dueDateStart >= today
             }
             .sorted { r1, r2 in
+                // Show undated reminders first
+                if r1.reminder.dueDate == nil && r2.reminder.dueDate != nil {
+                    return true
+                }
+                if r1.reminder.dueDate != nil && r2.reminder.dueDate == nil {
+                    return false
+                }
+                // Both have dates - sort by date
                 if let d1 = r1.reminder.dueDate, let d2 = r2.reminder.dueDate {
                     return d1 < d2
                 }
-                if r1.reminder.dueDate != nil { return true }
-                if r2.reminder.dueDate != nil { return false }
                 return false
             }
     }
@@ -303,7 +309,10 @@ struct RemindersView: View {
         guard let startDate = item.reminder.dueDate,
               let frequency = item.reminder.recurrenceFrequency,
               let interval = item.reminder.recurrenceInterval else {
-            return [formatDate(item.date)]
+            if let date = item.date {
+                return [formatDate(date)]
+            }
+            return []
         }
 
         // Calculate end date based on recurrence interval
@@ -320,7 +329,10 @@ struct RemindersView: View {
         case "yearly":
             endDate = calendar.date(byAdding: .year, value: interval, to: startDate)
         default:
-            return [formatDate(item.date)]
+            if let date = item.date {
+                return [formatDate(date)]
+            }
+            return []
         }
 
         // End date is one day before the next occurrence
@@ -329,7 +341,10 @@ struct RemindersView: View {
             return ["\(formatDate(startDate)) -", formatDate(actualEndDate)]
         }
 
-        return [formatDate(item.date)]
+        if let date = item.date {
+            return [formatDate(date)]
+        }
+        return []
     }
 
     var body: some View {
@@ -367,11 +382,18 @@ struct RemindersView: View {
                                                     .font(.customSize(dateStringIncludesYear(dateLines[index]) ? 10 : 12))
                                                     .foregroundColor(.secondary)
                                             }
-                                        } else {
+                                        } else if let date = item.date {
                                             // Single date for one-time
-                                            let dateText = formatDate(item.date)
+                                            let dateText = formatDate(date)
                                             Text(dateText)
                                                 .font(.customSize(dateStringIncludesYear(dateText) ? 10 : 12))
+                                                .foregroundColor(.secondary)
+                                        } else {
+                                            // Show "无日期/Undated" for reminders without dates
+                                            let isChinese = SettingsManager.appLanguage == .chinese ||
+                                                           (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+                                            Text(isChinese ? "无日期" : "Undated")
+                                                .font(.customSize(12))
                                                 .foregroundColor(.secondary)
                                         }
 
@@ -409,10 +431,19 @@ struct RemindersView: View {
                             ForEach(oneTimeReminders) { item in
                                 HStack(alignment: .center, spacing: 8) {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        let dateText = formatDate(item.date)
-                                        Text(dateText)
-                                            .font(.customSize(dateStringIncludesYear(dateText) ? 10 : 12))
-                                            .foregroundColor(.secondary)
+                                        if let date = item.date {
+                                            let dateText = formatDate(date)
+                                            Text(dateText)
+                                                .font(.customSize(dateStringIncludesYear(dateText) ? 10 : 12))
+                                                .foregroundColor(.secondary)
+                                        } else {
+                                            // Show "无日期/Undated" for reminders without dates
+                                            let isChinese = SettingsManager.appLanguage == .chinese ||
+                                                           (SettingsManager.appLanguage == .system && Locale.preferredLanguages.first?.hasPrefix("zh") == true)
+                                            Text(isChinese ? "无日期" : "Undated")
+                                                .font(.customSize(12))
+                                                .foregroundColor(.secondary)
+                                        }
 
                                         if item.reminder.hasTime, let dueDate = item.reminder.dueDate {
                                             Text(formatTime(dueDate))
